@@ -18,6 +18,7 @@ namespace EventAuthServer
         {
             return !context.RedirectUri.StartsWith("https", StringComparison.Ordinal)
                && !context.RedirectUri.StartsWith("http", StringComparison.Ordinal);
+
         }
         /// <summary>
         /// 
