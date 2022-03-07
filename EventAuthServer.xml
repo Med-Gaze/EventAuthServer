@@ -1,0 +1,602 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>EventAuthServer</name>
+    </assembly>
+    <members>
+        <member name="T:EventAuthServer.Controllers.AccountController">
+            <summary>
+            This sample controller implements a typical login/logout/provision workflow for local and external accounts.
+            The login service encapsulates the interactions with the user data store. This data store is in-memory only and cannot be used for production!
+            The interaction service provides a way for the UI to communicate with identityserver for validation and context retrieval
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.AccountController.#ctor(IdentityServer4.Services.IIdentityServerInteractionService,IdentityServer4.Stores.IClientStore,Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider,IdentityServer4.Services.IEventService,Microsoft.AspNetCore.Identity.UserManager{EventAuthServer.Entity.AppUserModel},Microsoft.AspNetCore.Identity.SignInManager{EventAuthServer.Entity.AppUserModel},Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            
+            </summary>
+            <param name="interaction"></param>
+            <param name="clientStore"></param>
+            <param name="schemeProvider"></param>
+            <param name="events"></param>
+            <param name="userManager"></param>
+            <param name="signInManager"></param>
+            <param name="configuration"></param>
+        </member>
+        <member name="M:EventAuthServer.Controllers.AccountController.Login(System.String)">
+            <summary>
+            Entry point into the login workflow
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.AccountController.Login(EventAuthServer.Domains.ViewModels.Identity.LoginInputModel,System.String)">
+            <summary>
+            Handle postback from username/password login
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.AccountController.Logout(System.String)">
+            <summary>
+            Show logout page
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.AccountController.Logout(EventAuthServer.Domains.ViewModels.Identity.LogoutInputModel)">
+            <summary>
+            Handle logout page postback
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.AccountController.AccessDenied">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:EventAuthServer.Controllers.ConsentController">
+            <summary>
+            This controller processes the consent UI
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.ConsentController.#ctor(IdentityServer4.Services.IIdentityServerInteractionService,IdentityServer4.Services.IEventService,Microsoft.Extensions.Logging.ILogger{EventAuthServer.Controllers.ConsentController})">
+            <summary>
+            
+            </summary>
+            <param name="interaction"></param>
+            <param name="events"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:EventAuthServer.Controllers.ConsentController.Index(System.String)">
+            <summary>
+            Shows the consent screen
+            </summary>
+            <param name="returnUrl"></param>
+            <returns></returns>
+        </member>
+        <member name="M:EventAuthServer.Controllers.ConsentController.Index(EventAuthServer.Domains.ViewModels.Identity.ConsentInputModel)">
+            <summary>
+            Handles the consent screen postback
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.ConsentController.CreateScopeViewModel(IdentityServer4.Validation.ParsedScopeValue,IdentityServer4.Models.ApiScope,System.Boolean)">
+            <summary>
+            
+            </summary>
+            <param name="parsedScopeValue"></param>
+            <param name="apiScope"></param>
+            <param name="check"></param>
+            <returns></returns>
+        </member>
+        <member name="T:EventAuthServer.Controllers.DeviceController">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.DeviceController.#ctor(IdentityServer4.Services.IDeviceFlowInteractionService,IdentityServer4.Services.IEventService,Microsoft.Extensions.Options.IOptions{IdentityServer4.Configuration.IdentityServerOptions},Microsoft.Extensions.Logging.ILogger{EventAuthServer.Controllers.DeviceController})">
+            <summary>
+            
+            </summary>
+            <param name="interaction"></param>
+            <param name="eventService"></param>
+            <param name="options"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:EventAuthServer.Controllers.DeviceController.Index">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:EventAuthServer.Controllers.DeviceController.UserCodeCapture(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="userCode"></param>
+            <returns></returns>
+        </member>
+        <member name="M:EventAuthServer.Controllers.DeviceController.Callback(EventAuthServer.Domains.ViewModels.Identity.DeviceAuthorizationInputModel)">
+            <summary>
+            
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:EventAuthServer.Controllers.DeviceController.CreateScopeViewModel(IdentityServer4.Validation.ParsedScopeValue,IdentityServer4.Models.ApiScope,System.Boolean)">
+            <summary>
+            
+            </summary>
+            <param name="parsedScopeValue"></param>
+            <param name="apiScope"></param>
+            <param name="check"></param>
+            <returns></returns>
+        </member>
+        <member name="T:EventAuthServer.Controllers.DiagnosticsController">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.DiagnosticsController.Index">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:EventAuthServer.Controllers.ExternalController">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.ExternalController.#ctor(IdentityServer4.Services.IIdentityServerInteractionService,IdentityServer4.Stores.IClientStore,IdentityServer4.Services.IEventService,Microsoft.Extensions.Logging.ILogger{EventAuthServer.Controllers.ExternalController},IdentityServer4.Test.TestUserStore)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.ExternalController.Challenge(System.String,System.String)">
+            <summary>
+            initiate roundtrip to external authentication provider
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.ExternalController.Callback">
+            <summary>
+            Post processing of external authentication
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Controllers.GrantsController">
+            <summary>
+            This sample controller allows a user to revoke grants given to clients
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.GrantsController.#ctor(IdentityServer4.Services.IIdentityServerInteractionService,IdentityServer4.Stores.IClientStore,IdentityServer4.Stores.IResourceStore,IdentityServer4.Services.IEventService)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.GrantsController.Index">
+            <summary>
+            Show list of grants
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.GrantsController.Revoke(System.String)">
+            <summary>
+            Handle postback to revoke a client
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Controllers.HomeController.Error(System.String)">
+            <summary>
+            Shows the error page
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Datum.Static.ApiResourceClient">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Datum.Static.ApiResourceClient.GetIdentityResources">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:EventAuthServer.Datum.Static.ApiResourceClient.GetApiScopes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:EventAuthServer.Datum.Static.ApiResourceClient.GetApiResources">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:EventAuthServer.Datum.Static.ApiResourceClient.GetClients">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.ExternalProvider">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ExternalProvider.DisplayName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ExternalProvider.AuthenticationScheme">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.LoggedOutViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoggedOutViewModel.PostLogoutRedirectUri">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoggedOutViewModel.ClientName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoggedOutViewModel.SignOutIframeUrl">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoggedOutViewModel.AutomaticRedirectAfterSignOut">
+            <summary>
+            
+            </summary>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoggedOutViewModel.LogoutId">
+            <summary>
+            
+            </summary>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoggedOutViewModel.TriggerExternalSignout">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoggedOutViewModel.ExternalAuthenticationScheme">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.LoginInputModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoginInputModel.Username">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoginInputModel.Password">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoginInputModel.RememberLogin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoginInputModel.ReturnUrl">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.LoginViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoginViewModel.AllowRememberLogin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoginViewModel.EnableLocalLogin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoginViewModel.ExternalProviders">
+            <summary>
+            
+            </summary>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoginViewModel.VisibleExternalProviders">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoginViewModel.IsExternalLoginOnly">
+            <summary>
+            
+            </summary>
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.LoginViewModel.ExternalLoginScheme">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.RedirectViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.RedirectViewModel.RedirectUrl">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.ConsentInputModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentInputModel.Button">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentInputModel.ScopesConsented">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentInputModel.RememberConsent">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentInputModel.ReturnUrl">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentInputModel.Description">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.ConsentViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentViewModel.ClientName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentViewModel.ClientUrl">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentViewModel.ClientLogoUrl">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentViewModel.AllowRememberConsent">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentViewModel.IdentityScopes">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ConsentViewModel.ApiScopes">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.ScopeViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ScopeViewModel.Value">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ScopeViewModel.DisplayName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ScopeViewModel.Description">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ScopeViewModel.Emphasize">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ScopeViewModel.Required">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ScopeViewModel.Checked">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.DeviceAuthorizationInputModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.DeviceAuthorizationInputModel.UserCode">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.DeviceAuthorizationViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.DeviceAuthorizationViewModel.UserCode">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.DeviceAuthorizationViewModel.ConfirmUserCode">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.DiagnosticsViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Domains.ViewModels.Identity.DiagnosticsViewModel.#ctor(Microsoft.AspNetCore.Authentication.AuthenticateResult)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.DiagnosticsViewModel.AuthenticateResult">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.DiagnosticsViewModel.Clients">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.ErrorViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Domains.ViewModels.Identity.ErrorViewModel.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Domains.ViewModels.Identity.ErrorViewModel.#ctor(System.String)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.ErrorViewModel.Error">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.GrantsViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.GrantsViewModel.Grants">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Domains.ViewModels.Identity.GrantViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.GrantViewModel.ClientId">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.GrantViewModel.ClientName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.GrantViewModel.ClientUrl">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.GrantViewModel.ClientLogoUrl">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.GrantViewModel.Description">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.GrantViewModel.Created">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.GrantViewModel.Expires">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.GrantViewModel.IdentityGrantNames">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:EventAuthServer.Domains.ViewModels.Identity.GrantViewModel.ApiGrantNames">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:EventAuthServer.Extensions">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:EventAuthServer.Extensions.IsNativeClient(IdentityServer4.Models.AuthorizationRequest)">
+            <summary>
+            Checks if the redirect URI is for a native client.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:EventAuthServer.Extensions.LoadingPage(Microsoft.AspNetCore.Mvc.Controller,System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="controller"></param>
+            <param name="viewName"></param>
+            <param name="redirectUri"></param>
+            <returns></returns>
+        </member>
+        <member name="T:EventAuthServer.AppDbContext">
+            <summary>
+            
+            </summary>
+        </member>
+    </members>
+</doc>

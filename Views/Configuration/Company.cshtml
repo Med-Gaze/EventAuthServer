@@ -1,0 +1,127 @@
+﻿
+@{
+    ViewData["Title"] = "Organization";
+}
+@model OrganisationViewModel
+<!-- Body Content Wrapper -->
+<div class="ms-content-wrapper">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="ms-panel">
+                <div class="ms-panel-header">
+                    <h6>Organization</h6>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p>Manage Organization Detail</p>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <p><a class="btn btn-primary btn-lg" asp-action="Index" role="button">Go Back</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="ms-panel-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <p class="text-success mt-1"><strong>Success: @TempData["SuccessMessage"]</strong> </p>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <p class="text-danger mt-1"><strong>Error: @TempData["ErrorMessage"]</strong> </p>
+                    }
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form asp-action="Manage" asp-controller="Organisation" method="post" id="mainForm" enctype="multipart/form-data">
+                                <input type="hidden" asp-for="Id" />
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label>Name</label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="Name" class="form-control" placeholder="Organization name">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label>Logo</label>
+                                        <div class="input-group">
+                                            <div class="custom-file">
+                                                <input type="file" accept="image/png" onchange="uploadLogo()" asp-for="LogoFile" class="custom-file-input" id="logoImageFile">
+                                                <label class="custom-file-label" for="validatedCustomFile">
+                                                    <span id="imageLabel">  </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <span class="displayImage">
+                                            @if (!string.IsNullOrEmpty(Model?.Id))
+                                            {
+                                                <img id="displayLogoImage" src="data:image/png;charset=utf-8;base64,@Model?.ImgBase64" class="ms-img-medium">
+                                            }
+                                            else
+                                            {
+                                                <img id="displayLogoImage" src="#" class="ms-img-medium">
+
+                                            }
+                                        </span>
+
+
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label>Address</label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="Address" class="form-control" placeholder="Organization address">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label>Phone Number</label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="PhoneNumber" class="form-control" placeholder="Organization phone number">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label>Email Address</label>
+                                        <div class="input-group">
+                                            <input type="text" asp-for="Email" class="form-control" placeholder="Organization email">
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" type="submit">Save</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        $(function () {
+            uploadLogo();
+        });
+        function uploadLogo() {
+            imageLabel.textContent = "Choose image...";
+            $('#displayLogoImage').hide();
+            var fileName = '@Model?.FileName';
+            if (fileName) {
+                imageLabel.textContent = fileName;
+                $('#displayLogoImage').show();
+            }
+            const [file] = logoImageFile?.files
+            if (file) {
+                imageLabel.textContent = file.name;
+                var url = URL.createObjectURL(file);
+                displayLogoImage.src = url;
+                $('#displayLogoImage').show();
+            }
+        }
+    </script>
+
+}
+

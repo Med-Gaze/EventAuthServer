@@ -1,0 +1,57 @@
+﻿.swagger-ui .topbar {
+    background: #c80680;
+    /* Old browsers */
+    background: #c80680;
+    /* Old browsers  */
+    background: -moz-linear-gradient(left, #c80680 0%, #731472 41%);
+    /* FF3.6+ */
+    background: -webkit-linear-gradient(left, #c80680 0%, #731472 41%);
+    /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(left, #c80680 0%, #731472 41%);
+    /* Opera 11.10+ */
+    background: -ms-linear-gradient(left, #c80680 0%, #731472 41%);
+    /* IE10+ */
+    background: linear-gradient(to right, #c80680 0%, #731472 41%);
+    /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='$left', endColorstr='$right',GradientType=0 );
+    /* IE6-9 */
+}
+
+#header {
+    background: #222 !important;
+}
+
+.info {
+    margin:30px !important;
+    border-radius: 5px;
+    padding:20px;
+    background-color: antiquewhite;
+}
+
+input[name=baseUrl] {
+    display: none !important;
+}
+
+.logo__title {
+    display: none !important;
+}
+
+#api_info a {
+    color: #007bff !important;
+    text-decoration: none !important;
+}
+.opblock-summary-description {
+    text-align: end !important;
+    color: #007bff !important;
+}
+
+.swagger-ui .opblock .opblock-summary-operation-id, .swagger-ui .opblock .opblock-summary-path, .swagger-ui .opblock .opblock-summary-path__deprecated {
+    color: #174f98 !important;
+}
+
+#api_info a:hover,
+#api_info a:focus,
+#api_info a:active {
+    color: #0056b3 !important;
+    text-decoration: underline !important;
+}

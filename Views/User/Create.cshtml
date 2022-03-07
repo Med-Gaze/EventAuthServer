@@ -1,0 +1,186 @@
+﻿@{
+    ViewData["Title"] = "User Registration";
+}
+@model ApplicationUserRegistrationViewModel
+<!-- Body Content Wrapper -->
+<div class="ms-content-wrapper">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="ms-panel">
+                <div class="ms-panel-header">
+                    <h6>Internal user registration</h6>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p>Create user internally</p>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <p><a class="btn btn-primary btn-lg" asp-action="Index" role="button">Go Back</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="ms-panel-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                    <p class="text-success mt-1"><strong>Success: @TempData["SuccessMessage"]</strong> </p>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                    <p class="text-danger mt-1"><small>Error: @Html.Raw(TempData["ErrorMessage"])</small> </p>
+                    }
+                    <div class="row">
+
+                        <div class="col-md-12">
+                            <form asp-action="Email" method="post" id="mainForm" enctype="multipart/form-data">
+                                
+                                <button class="btn btn-primary" type="submit">Save</button>
+                                <button class="btn btn-danger" onclick="resetForm()" type="reset">Reset</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="modal fade bd-example-modal-lg" tabindex="-1" id="templateDisplayModal" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Email template</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 pt-4">
+                            <div class="dataTable">
+                                <div class="col-md-12">
+                                    <div class="table-responsive">
+                                        <table class="table thead-primary" style="width:100%">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>S.N</th>
+                                                    <th>Feature</th>
+                                                    <th>Sending email</th>
+                                                    <th>Server</th>
+                                                    <th>Port</th>
+                                                    <th>Username</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#template').summernote({
+            placeholder: 'Email template html design here!',
+            tabsize: 2,
+            height: 400,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['fontname', ['fontname']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture', 'video']],
+                ['view', ['codeview']]
+            ],
+        });
+        //initilize();
+        //loadData();
+        $('#IsTemplate').on('change', function () {
+            if (this.checked) {
+                $('#templateModal').modal();
+            } else {
+                $('#template').summernote('reset');
+            }
+        });
+    });
+
+    var baseUrl = '@Url.Content("~/")';
+    function initilize() {
+        var url = baseUrl + "Configuration/GetFeatures";
+        $.get(url, function (response) {
+            $("#FeatureAlias option").remove();
+            $("#FeatureAlias").append(`<option value=''> Apply for all feature</option >`);
+            $.each(response, function (i, item) {
+                var rows = `<option value = '${item.alias}'>${item.title}</option>`;
+                $('#FeatureAlias').append(rows);
+            });
+        });
+    }
+    function loadData() {
+        var url = baseUrl + "Email/GetEmailConfigurarion";
+        $.get(url, function (response) {
+            $(".table tbody tr").remove();
+            $.each(response, function (i, item) {
+                htmlTemplate = JSON.stringify(item.htmlTemplate);
+                var rows = "<tr>"
+                    + "<td>" + (i + 1) + "</td>"
+                    + "<td>" + (!item.featureAlias || item.featureAlias === 'null' ? "Apply to all" : item.featureAlias) + "</td>"
+                    + "<td>" + item.emailFrom + "</td>"
+                    + "<td>" + item.serverName + "</td>"
+                    + "<td>" + item.port + "</td>"
+                    + "<td>" + item.username + "</td>"
+                    + `<td class='text-nowrap'><a class='btn-sm ${item.hasTemplate ? "" : "d-none"}' href='#' onClick='displayTemplate(${htmlTemplate})' data-toggle='tooltip' data-placement='bottom' style='padding:5px'><i class='far fa-eye'></i>View</a>
+                            <a class='btn-sm' href='#' onClick='populateData("${item.id}","${item.featureAlias}","${item.emailFrom}","${item.serverName}",${item.port},"${item.username}","${item.apiKey}",${item.hasTemplate},${htmlTemplate})' data-toggle='tooltip' data-placement='bottom' style='padding:5px'><i class='far fa-edit'></i>Update</a></td >`
+                    + "</tr>";
+                $('.table tbody ').append(rows);
+            });
+        });
+    }
+    function populateData(id, featureAlias, emailFrom, serverName, port, username, apiKey, hasTemplate, htmlTemplate) {
+        $('#template').summernote('reset');
+        $('#Id').val(id);
+        $('#FeatureAlias').val(featureAlias && featureAlias != 'null' ? featureAlias : '').change();
+        $('#EmailFrom').val(emailFrom);
+        $('#ServerName').val(serverName);
+        $('#Port').val(port);
+        $('#Username').val(username);
+        $('.confirm').hide();
+        $("#IsTemplate").prop('checked', hasTemplate).change();
+        $("#IsTemplate").val(hasTemplate).change();
+        if (hasTemplate) {
+            $('#template').summernote('pasteHTML', htmlTemplate);
+        }
+    }
+    function displayTemplate(html) {
+        $('#templateDisplayModal .modal-body').html('');
+        $('#templateDisplayModal').modal();
+        $('#templateDisplayModal .modal-body').html(html);
+    }
+
+    function resetForm() {
+        $('#mainForm').trigger("reset");
+        $(':input').val('');
+        $('.confirm').show();
+        $('#template').summernote('reset');
+    }
+</script>
+
+}
+

@@ -1,0 +1,121 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+@using EventAuthServer.Datum.Enum;
+<!-- Body Content Wrapper -->
+<div class="ms-content-wrapper">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="ms-panel">
+                <div class="ms-panel-header">
+                    <h6>User</h6>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p>Display all type of users</p>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <p><a class="btn btn-primary btn-lg" asp-action="Index" role="button">Go Back</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="ms-panel-body">
+                    <p class="text-right"><a class="btn btn-primary btn-lg" asp-action="Create" role="button"><i class="fa fa-plus mr-2"></i>Create</a></p>
+                    <div class="row">
+                        <div class="col-md-12 pt-4">
+                            <div class="dataTable">
+                                <div class="col-md-12">
+                                    <div class="table-responsive">
+                                        <table class="table thead-primary" style="width:100%">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>S.N</th>
+                                                    <th>Profile</th>
+                                                    <th>Name</th>
+                                                    <th>Email</th>
+                                                    <th>Phone</th>
+                                                    <th>Deactivated</th>
+                                                    <th>Verified</th>
+                                                    <th>Blocked</th>
+                                                    <th>Internal</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            loadData();
+        });
+
+        var baseUrl = '@Url.Content("~/")';
+        function loadData() {
+            var url = baseUrl + "User/GetUser";
+            $.get(url, function (response) {
+                $(".table tbody tr").remove();
+                $.each(response, function (i, item) {
+                    var rows = "<tr>"
+                        + "<td>" + (i + 1) + "</td>"
+                        + "<td>" + "-" + "</td>"
+                        + "<td>" + item.fullName + "</td>"
+                        + "<td>" + item.email + "</td>"
+                        + "<td>" + item.phoneNumber + "</td>"
+                        + "<td>" + (item.isDeactivated?'true':'false') + "</td>"
+                        + "<td>" + (item.isVerified?'true':'false') + "</td>"
+                        + "<td>" + (item.isBlocked?'true':'false') + "</td>"
+                        + "<td>" + (item.isInternal?'true':'false') + "</td>"
+                        + "<td>" + (item.status) + "</td>"
+                        + `<td class='text-nowrap'><a class='btn-sm  href='#' data-toggle='tooltip' data-placement='bottom' style='padding:5px'><i class='far fa-eye'></i></a>
+                            <a class='btn-sm' href='#'  data-toggle='tooltip' data-placement='bottom' style='padding:5px'><i class='far fa-cog'></i></a></td >`
+                        + "</tr>";
+                    $('.table tbody ').append(rows);
+                });
+            });
+        }
+        function populateData(id, featureAlias, emailFrom, serverName, port, username, apiKey, hasTemplate, htmlTemplate) {
+            $('#template').summernote('reset');
+            $('#Id').val(id);
+            $('#FeatureAlias').val(featureAlias && featureAlias != 'null' ? featureAlias : '').change();
+            $('#EmailFrom').val(emailFrom);
+            $('#ServerName').val(serverName);
+            $('#Port').val(port);
+            $('#Username').val(username);
+            $('.confirm').hide();
+            $("#IsTemplate").prop('checked', hasTemplate).change();
+            $("#IsTemplate").val(hasTemplate).change();
+            if (hasTemplate) {
+               $('#template').summernote('pasteHTML', htmlTemplate);
+            }
+        }
+        function displayTemplate(html) {
+            $('#templateDisplayModal .modal-body').html('');
+            $('#templateDisplayModal').modal();
+            $('#templateDisplayModal .modal-body').html(html);
+        }
+
+        function resetForm() {
+            $('#mainForm').trigger("reset");
+            $(':input').val('');
+            $('.confirm').show();
+            $('#template').summernote('reset');
+        }
+    </script>
+
+}
+
