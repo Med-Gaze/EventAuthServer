@@ -30,8 +30,15 @@ namespace EventAuthServer.Helper
             var userClaims = new List<Claim>();
 
             var userId = context.Subject.GetSubjectId();
-            
-            //context.IssuedClaims.AddRange(userClaims);
+            var user = await _userManager.FindByIdAsync(userId);
+            var role = await _userManager.GetRolesAsync(user);
+            userClaims.AddRange(new List<Claim>
+            {
+                new Claim(ClaimTypes.Role, role.FirstOrDefault()),
+                new Claim("FullName", user.FullName),
+                new Claim("NickName", user.NickName)
+            });;
+            context.IssuedClaims.AddRange(userClaims);
         }
 
         public async Task IsActiveAsync(IsActiveContext context)
