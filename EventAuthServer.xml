@@ -142,7 +142,7 @@
             
             </summary>
         </member>
-        <member name="M:EventAuthServer.Controllers.ExternalController.#ctor(IdentityServer4.Services.IIdentityServerInteractionService,IdentityServer4.Stores.IClientStore,IdentityServer4.Services.IEventService,Microsoft.Extensions.Logging.ILogger{EventAuthServer.Controllers.ExternalController},IdentityServer4.Test.TestUserStore)">
+        <member name="M:EventAuthServer.Controllers.ExternalController.#ctor(IdentityServer4.Services.IIdentityServerInteractionService,IdentityServer4.Stores.IClientStore,IdentityServer4.Services.IEventService,Microsoft.Extensions.Logging.ILogger{EventAuthServer.Controllers.ExternalController},Microsoft.AspNetCore.Identity.SignInManager{EventAuthServer.Entity.AppUserModel},Microsoft.AspNetCore.Identity.UserManager{EventAuthServer.Entity.AppUserModel})">
             <summary>
             
             </summary>
@@ -152,7 +152,7 @@
             initiate roundtrip to external authentication provider
             </summary>
         </member>
-        <member name="M:EventAuthServer.Controllers.ExternalController.Callback">
+        <member name="M:EventAuthServer.Controllers.ExternalController.Callback(System.String,System.String)">
             <summary>
             Post processing of external authentication
             </summary>

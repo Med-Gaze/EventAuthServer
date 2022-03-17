@@ -85,8 +85,8 @@ namespace EventAuthServer
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 options.User.RequireUniqueEmail = true;
                 options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
-                options.SignIn.RequireConfirmedEmail = true;
-                options.SignIn.RequireConfirmedAccount = true;
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedAccount = false;
                 options.SignIn.RequireConfirmedPhoneNumber = false;
                 options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
             })
@@ -131,7 +131,19 @@ namespace EventAuthServer
             });
 
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie().AddLocalApi();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddGoogle(options =>
+            {
+                IConfigurationSection googleAuthNSection =
+                Configuration.GetSection("IdentityConfig:SocialMedia:Google");
+                options.ClientId = googleAuthNSection["ClientId"];
+                options.ClientSecret = googleAuthNSection["ClientSecret"];
+            }).AddFacebook(options =>
+            {
+                IConfigurationSection FBAuthNSection =
+                Configuration.GetSection("IdentityConfig:SocialMedia:Facebook");
+                options.ClientId = FBAuthNSection["ClientId"];
+                options.ClientSecret = FBAuthNSection["ClientSecret"];
+            }).AddCookie().AddLocalApi();
 
             services.AddAuthorization(options =>
             {

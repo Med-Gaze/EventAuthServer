@@ -44,15 +44,24 @@
                             }
                             <button class="btn btn-primary mt-4 d-block w-100" name="button" value="login">Sign In</button>
                             <span class="d-block text-center my-4">Or</span>
-                            <button type="button" class="btn mt-4 d-block w-100 btn-social-login">
-                                <img src="~/img/others/facebook.png" alt="image"> <span>Login with Facebook</span>
-                            </button>
-                            <button type="button" class="btn mt-4 d-block w-100 btn-social-login">
-                                <img src="~/img/others/google.png" alt="image"> <span>Login with Google</span>
-                            </button>
+                            @if (Model.VisibleExternalProviders.Any())
+                            {
+                                <a asp-controller="External"
+                                   asp-action="Challenge"
+                                   asp-route-scheme="Google"
+                                   asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-sm mt-4 d-block w-100 btn-gradient-warning">
+                                    <img src="~/img/others/google.png" class="w-5" alt="image"> <span>Login with Google</span>
+                                </a>
+                                <a asp-controller="External"
+                                   asp-action="Challenge"
+                                   asp-route-scheme="Facebook"
+                                   asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-sm mt-4 d-block w-100 btn-gradient-primary">
+                                    <img src="~/img/others/facebook.png" class="w-5" alt="image"> <span>Login with Facebook</span>
+                                </a>
+                            }
                             <p class="mb-0 mt-3 text-center">
-                                Don't have an account? <a class="btn-link"
-                                                          routerLink="/prebuilt-pages/default-register">Create Account</a>
+                                Don't have an account? <a class="btn-link" asp-action="Register" asp-route-returnUrl="Login"
+                                                          >Create Account</a>
                             </p>
                         </form>
                     </div>
@@ -60,32 +69,7 @@
             </div>
         </div>
     }
-    @if (Model.VisibleExternalProviders.Any())
-    {
-        <div class="col-sm-6">
-            <div class="card">
-                <div class="card-header">
-                    <h2>External Account</h2>
-                </div>
-                <div class="card-body">
-                    <ul class="list-inline">
-                        @foreach (var provider in Model.VisibleExternalProviders)
-                        {
-                            <li class="list-inline-item">
-                                <a class="btn btn-secondary"
-                                   asp-controller="External"
-                                   asp-action="Challenge"
-                                   asp-route-scheme="@provider.AuthenticationScheme"
-                                   asp-route-returnUrl="@Model.ReturnUrl">
-                                    @provider.DisplayName
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </div>
-        </div>
-    }
+
 
     @if (!Model.EnableLocalLogin && !Model.VisibleExternalProviders.Any())
     {

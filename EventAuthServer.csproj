@@ -47,6 +47,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="5.0.15" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="5.0.15" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.11.1" />
 		<PackageReference Include="IdentityServer4" Version="4.1.2" />
 		<PackageReference Include="IdentityServer4.EntityFramework.Storage" Version="4.1.2" />

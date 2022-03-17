@@ -30,5 +30,6 @@ namespace EventAuthServer.Domains.ViewModels.Identity
         /// 
         /// </summary>
         public string ReturnUrl { get; set; }
+
     }
 }
