@@ -38,7 +38,7 @@ namespace EventAuthServer.Controllers
     /// The interaction service provides a way for the UI to communicate with identityserver for validation and context retrieval
     /// </summary>
     //[SecurityHeaders]
-    [AllowAnonymous]
+    
     public class AccountController : Controller
     {
         private readonly UserManager<AppUserModel> userManager;
@@ -85,6 +85,7 @@ namespace EventAuthServer.Controllers
         /// Entry point into the login workflow
         /// </summary>
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(string returnUrl)
         {
             // build a model so we know what to show on the login page
@@ -104,6 +105,7 @@ namespace EventAuthServer.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginInputModel model, string button)
         {
             // check if we are in the context of an authorization request
@@ -318,6 +320,7 @@ namespace EventAuthServer.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult AccessDenied()
         {
             return View();
@@ -325,6 +328,7 @@ namespace EventAuthServer.Controllers
 
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(string returnUrl)
         {
             // build a model so we know what to show on the login page
@@ -341,6 +345,7 @@ namespace EventAuthServer.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
@@ -387,6 +392,7 @@ namespace EventAuthServer.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult ForgotPassword()
         {
             return View();
@@ -394,6 +400,7 @@ namespace EventAuthServer.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel forgotPassword)
         {
             if (!ModelState.IsValid) return View(forgotPassword);
@@ -425,17 +432,18 @@ namespace EventAuthServer.Controllers
                 await _emailService.SendMail(emailModel, emailConfig);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ModelState.AddModelError("Email", $"Server issue.");
                 return View();
             }
 
             TempData["success"] = $"{forgotPassword.Email} password reset link has send to email. please check it.";
-            return RedirectToAction(nameof(Login));
+            return RedirectToAction(nameof(Logout));
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult ResetPassword(string token, string email)
         {
             var model = new ResetPasswordViewModel
@@ -447,8 +455,45 @@ namespace EventAuthServer.Controllers
             return View(model);
         }
 
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult ChangePassword(string returnUrl)
+        {
+
+            return View(new ChangePasswordViewModel
+            {
+                ReturnUrl = returnUrl
+            });
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+            var userEmail = HttpContext.User.FindFirstValue(ClaimTypes.Email);
+            var user = await this.userManager.FindByEmailAsync(userEmail);
+
+            var resetPasswordResult = await this.userManager.ChangePasswordAsync(user, model.CurrentPassword, model.Password);
+
+            if (!resetPasswordResult.Succeeded)
+            {
+                foreach (var error in resetPasswordResult.Errors)
+                {
+                    ModelState.TryAddModelError(error.Code, error.Description);
+                }
+                return View();
+            }
+
+            TempData["success"] = $"{userEmail} password has changed.";
+
+            return RedirectToAction(nameof(Logout));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid)

@@ -90,7 +90,19 @@ namespace EventAuthServer.Domains.ViewModels.Identity
         [Required]
         public string Token { get; set; }
     }
+    public class ChangePasswordViewModel
+    {
+        [DataType(DataType.Password)]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
+        [Required(ErrorMessage = "Current password is required")]
+        public string CurrentPassword { get; set; }
 
+        [Required(ErrorMessage = "New password is required")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
+        public string ReturnUrl { get; set; }
+
+    }
     public class SocialMediaRegistrationViewModel
     {
         public string Token { get; set; }
