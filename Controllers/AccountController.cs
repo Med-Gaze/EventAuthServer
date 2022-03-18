@@ -3,6 +3,7 @@
 
 
 using EventAuthServer;
+using EventAuthServer.Datum.Enum;
 using EventAuthServer.Datum.Static;
 using EventAuthServer.Domains.ViewModels.Identity;
 using EventAuthServer.Entity;
@@ -38,7 +39,7 @@ namespace EventAuthServer.Controllers
     /// The interaction service provides a way for the UI to communicate with identityserver for validation and context retrieval
     /// </summary>
     //[SecurityHeaders]
-    
+
     public class AccountController : Controller
     {
         private readonly UserManager<AppUserModel> userManager;
@@ -355,7 +356,7 @@ namespace EventAuthServer.Controllers
 
             if (await this.userManager.FindByEmailAsync(model.Email) != null)
             {
-                ModelState.AddModelError(string.Empty, "Use already registered with same email.");
+                ModelState.AddModelError(nameof(model.Email), "Use already registered with same email.");
                 var vm = await BuildRegisterViewModelAsync(model.ReturnUrl);
                 return View(vm);
             }
@@ -386,6 +387,29 @@ namespace EventAuthServer.Controllers
                 ModelState.AddModelError(string.Empty, userResult.Errors.FirstOrDefault().Description);
                 var vm = await BuildRegisterViewModelAsync(model.ReturnUrl);
                 return View(vm);
+            }
+            var token = await this.userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callBack = Url.Action(nameof(ConfirmEmail), "Account", new { token, email = user.Email }, Request.Scheme);
+            var confirmationLink = $"This is a link to confirm your account." +
+                       $"<br/> Click Below! <br/>" +
+                       $"<a style='padding:12px 28px; margin-top:30px; border-radius: 4px; background-color: #4CAF50;" +
+                       $" color:#ffff;text-decoration: none;text-align: center;border: none;" +
+                       $"display: inline-block;cursor: pointer;' href = '{callBack}'>Click here to confirm</a>";
+
+            var emailConfig = this.configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+
+            var emailModel = new EmailViewModel(emailTo: user.Email, subject: "Confirm Account Link",
+                  content: confirmationLink, contentType: (int)EmailContentTypeEnum.Html);
+
+            try
+            {
+                await _emailService.SendMail(emailModel, emailConfig);
+
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("Email", $"Server issue.");
+                return View();
             }
             TempData["success"] = $"{model.Email} has created.";
             return Redirect(model.ReturnUrl);
@@ -439,7 +463,7 @@ namespace EventAuthServer.Controllers
             }
 
             TempData["success"] = $"{forgotPassword.Email} password reset link has send to email. please check it.";
-            return RedirectToAction(nameof(Logout));
+            return RedirectToAction(nameof(Login));
         }
 
         [HttpGet]
@@ -453,6 +477,35 @@ namespace EventAuthServer.Controllers
             };
 
             return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var token = model.Token;
+                var emailId = model.Email;
+                var user = await this.userManager.FindByEmailAsync(emailId);
+                if (user != null)
+                {
+                    if (user.EmailConfirmed)
+                    {
+                        TempData["success"] = $"{model.Email} already confirmed.";
+                        return RedirectToAction(nameof(Login));
+                    }
+                    var result = await this.userManager.ConfirmEmailAsync(user, token);
+                    if (result.Succeeded)
+                    {
+                        user.Status = (int)AccountStatusEnum.Requested;
+                        await this.userManager.UpdateAsync(user);
+                        TempData["success"] = $"{model.Email} confirmed.";
+                        return RedirectToAction(nameof(Login));
+                    }
+                }
+            }
+            return RedirectToAction(nameof(Login));
         }
 
 

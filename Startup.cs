@@ -85,8 +85,8 @@ namespace EventAuthServer
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 options.User.RequireUniqueEmail = true;
                 options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
-                options.SignIn.RequireConfirmedEmail = false;
-                options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedAccount = true;
                 options.SignIn.RequireConfirmedPhoneNumber = false;
                 options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
             })

@@ -116,7 +116,8 @@ namespace EventAuthServer.Controllers
                         {
                             UserName = info.Principal.FindFirstValue(ClaimTypes.Email),
                             FullName = info.Principal.FindFirstValue(ClaimTypes.Name),
-                            Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+                            Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+                            EmailConfirmed = true
                         };
 
                         await _userManager.CreateAsync(user);
