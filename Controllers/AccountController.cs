@@ -14,6 +14,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
+using med.common.api.library.fileupload;
 using med.common.library.configuration.service;
 using med.common.library.constant;
 using med.common.library.Enum;
@@ -27,6 +28,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -50,6 +52,8 @@ namespace EventAuthServer.Controllers
         private readonly IEventService _events;
         private readonly IConfiguration configuration;
         private readonly IEmailService _emailService;
+        private readonly IAWSFileUploader _aWSFileUploader;
+        private readonly AppDbContext _appDbContext;
         /// <summary>
         /// 
         /// </summary>
@@ -61,6 +65,8 @@ namespace EventAuthServer.Controllers
         /// <param name="signInManager"></param>
         /// <param name="configuration"></param>
         /// <param name="emailService"></param>
+        /// <param name="aWSFileUploader"></param>
+        /// <param name="appDbContext"></param>
         public AccountController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
@@ -68,7 +74,8 @@ namespace EventAuthServer.Controllers
             IEventService events,
             UserManager<AppUserModel> userManager,
             SignInManager<AppUserModel> signInManager,
-            IConfiguration configuration, IEmailService emailService)
+            IConfiguration configuration, IEmailService emailService,
+            IAWSFileUploader aWSFileUploader, AppDbContext appDbContext)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -80,6 +87,8 @@ namespace EventAuthServer.Controllers
             _schemeProvider = schemeProvider;
             _events = events;
             _emailService = emailService;
+            _aWSFileUploader = aWSFileUploader;
+            _appDbContext = appDbContext;
         }
 
         /// <summary>
@@ -479,6 +488,32 @@ namespace EventAuthServer.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await this.userManager.FindByEmailAsync(model.Email);
+            if (user == null) return NotFound($"{model.Email} not found.");
+
+            var resetPasswordResult = await this.userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+            if (!resetPasswordResult.Succeeded)
+            {
+                foreach (var error in resetPasswordResult.Errors)
+                {
+                    ModelState.TryAddModelError(error.Code, error.Description);
+                }
+                return View();
+            }
+
+            TempData["success"] = $"{model.Email} password has reset successfully.";
+
+            return RedirectToAction(nameof(Login));
+        }
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailViewModel model)
@@ -544,33 +579,71 @@ namespace EventAuthServer.Controllers
 
             return RedirectToAction(nameof(Logout));
         }
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        public async Task<IActionResult> UploadProfile([FromForm] IFormFile profileImage)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await this.userManager.FindByEmailAsync(model.Email);
-            if (user == null) return NotFound($"{model.Email} not found.");
-
-            var resetPasswordResult = await this.userManager.ResetPasswordAsync(user, model.Token, model.Password);
-
-            if (!resetPasswordResult.Succeeded)
+            FileDriver entityFile = await FileUploadHelper.UploadFile(profileImage, "Logo", "User", _aWSFileUploader);
+            try
             {
-                foreach (var error in resetPasswordResult.Errors)
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var entity = _appDbContext.Users.FirstOrDefault(x => x.Id == userId);
+
+                var fileDriverData = _appDbContext.FileDriver.Add(entityFile);
+
+                entity.FileId = entityFile.Id;
+
+                await _appDbContext.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Logout));
+            }
+            catch
+            {
+                if (!string.IsNullOrEmpty(entityFile.Path))
                 {
-                    ModelState.TryAddModelError(error.Code, error.Description);
+                    if (!string.IsNullOrEmpty(entityFile.BucketName))
+                        await _aWSFileUploader.DeleteFile(entityFile.FileName, entityFile.BucketName);
+                    else
+                        FileDirectoryUploadHelper.DeleteFile(entityFile.Path);
                 }
-                return View();
+
+                throw;
             }
 
-            TempData["success"] = $"{model.Email} password has reset successfully.";
-
-            return RedirectToAction(nameof(Login));
         }
 
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetUploadProfile(Guid? fileId)
+        {
+            string base64 = string.Empty;
+            var fileDetail = (from user in _appDbContext.Users
+                              join fileDriverTemp in _appDbContext.FileDriver on user.FileId equals fileDriverTemp.Id into Temp
+                              from fileDriver in Temp.DefaultIfEmpty()
+                              select new
+                              {
+                                  user.FileId,
+                                  FilePath = fileDriver.Path,
+                                  fileDriver.BucketName,
+                                  fileDriver.FileName
+                              }).Where(x => !x.FileId.Equals(null) && x.FileId == fileId).FirstOrDefault();
+            if (fileDetail != null)
+            {
+                var stream = await _aWSFileUploader.GetFile(fileDetail.FileName, fileDetail.BucketName);
+                byte[] bytes;
+                using (var memoryStream = new MemoryStream())
+                {
+                    stream.CopyTo(memoryStream);
+                    bytes = memoryStream.ToArray();
+                }
+                base64 = Convert.ToBase64String(bytes);
+            }
+
+            return Ok(base64);
+
+        }
         private async Task<RegisterViewModel> BuildRegisterViewModelAsync(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);

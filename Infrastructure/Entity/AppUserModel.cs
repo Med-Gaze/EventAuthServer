@@ -10,7 +10,7 @@ namespace EventAuthServer.Entity
     {
         public string FullName { get; set; }
         public string NickName { get; set; }
-        public string PictureUrl { get; set; }
+        public Guid? FileId { get; set; }
         public int Status { get; set; }
         public DateTime CreatedDate { get; set; }
     }
