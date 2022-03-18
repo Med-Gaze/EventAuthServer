@@ -14,6 +14,10 @@
                             <input type="hidden" asp-for="ReturnUrl" />
                             <h1>Login to Account</h1>
                             <p>Please enter your email and password to continue</p>
+                            @if (TempData["success"] != null)
+                            {
+                                <p class="text-success successMsg">@TempData["success"]</p>
+                            }
                             <p><partial name="_ValidationSummary" /></p>
                             <div class="mb-3">
                                 <label asp-for="Username">Username</label>
@@ -38,7 +42,7 @@
                                     </label>
                                     <span asp-for="RememberLogin"> Remember Password </span>
                                     <label class="d-block mt-3">
-                                        <a href="javascript:void(0)" class="btn-link">Forgot Password?</a>
+                                        <a  asp-action="ForgotPassword" class="btn-link">Forgot Password?</a>
                                     </label>
                                 </div>
                             }
@@ -60,8 +64,7 @@
                                 </a>
                             }
                             <p class="mb-0 mt-3 text-center">
-                                Don't have an account? <a class="btn-link" asp-action="Register" asp-route-returnUrl="Login"
-                                                          >Create Account</a>
+                                Don't have an account? <a class="btn-link" asp-action="Register" asp-route-returnUrl="Login">Create Account</a>
                             </p>
                         </form>
                     </div>
@@ -81,3 +84,13 @@
     }
 
 </div>
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            setTimeout(function () {
+                $('.successMsg').hide();
+            }, 2000);
+        });
+    </script>
+}

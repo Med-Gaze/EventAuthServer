@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace EventAuthServer.Domains.ViewModels.Identity
 {
@@ -80,8 +81,12 @@ namespace EventAuthServer.Domains.ViewModels.Identity
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
+
         [Required(ErrorMessage = "Confirm password is required")]
+        [DataType(DataType.Password)]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
         [Required]
         public string Token { get; set; }
     }
@@ -96,5 +101,36 @@ namespace EventAuthServer.Domains.ViewModels.Identity
         public string UserId { get; set; }
         [Required]
         public string Token { get; set; }
+    }
+    public class RegisterViewModel
+    {
+        [Required]
+        [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
+        [Display(Name = "Name")]
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+
+        [Required]
+        public string LastName { get; set; }
+
+        public string CalledName { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Display(Name = "Password")]
+        public string Password { get; set; }
+
+        public string ReturnUrl { get; set; }
+        public bool EnableLocalLogin { get; set; } = true;
+        public IEnumerable<ExternalProvider> ExternalProviders { get; set; } = Enumerable.Empty<ExternalProvider>();
+
+        public bool IsExternalLoginOnly => EnableLocalLogin == false && ExternalProviders?.Count() == 1;
+        public string ExternalLoginScheme => IsExternalLoginOnly ? ExternalProviders?.SingleOrDefault()?.AuthenticationScheme : null;
+
     }
 }

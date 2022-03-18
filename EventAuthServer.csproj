@@ -89,6 +89,8 @@
 		<PackageReference Include="Serilog.Exceptions" Version="8.0.0" />
 		<PackageReference Include="Serilog.Sinks.Elasticsearch" Version="8.4.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+		<PackageReference Include="MimeKit" Version="3.1.1" />
+		<PackageReference Include="MailKit" Version="3.1.1" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -106,9 +108,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="med.common.api.library">
-			<HintPath>..\..\med.common.api.library\bin\Debug\net5.0\med.common.api.library.dll</HintPath>
-		</Reference>
+	  <Reference Include="med.common.api.library">
+	    <HintPath>..\..\med.common.api.library\bin\Debug\net5.0\med.common.api.library.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>

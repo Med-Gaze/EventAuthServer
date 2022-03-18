@@ -6,6 +6,7 @@ using IdentityServer4.Events;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using IdentityServer4.Test;
+using med.common.library.constant;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -101,10 +102,6 @@ namespace EventAuthServer.Controllers
 
             if (signInResult.Succeeded)
             {
-                return LocalRedirect(returnUrl);
-            }
-            else
-            {
                 // Get the email claim value
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
 
@@ -118,20 +115,28 @@ namespace EventAuthServer.Controllers
                         user = new AppUserModel
                         {
                             UserName = info.Principal.FindFirstValue(ClaimTypes.Email),
+                            FullName = info.Principal.FindFirstValue(ClaimTypes.Name),
                             Email = info.Principal.FindFirstValue(ClaimTypes.Email)
                         };
 
                         await _userManager.CreateAsync(user);
+                        await _userManager.AddToRoleAsync(user, IdentityRoleConstant.Default.ToString());
                     }
 
                     // Add a login (i.e insert a row for the user in AspNetUserLogins table)
                     await _userManager.AddLoginAsync(user, info);
                     await _signInManager.SignInAsync(user, isPersistent: true);
-
+                    if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Name))
+                    {
+                        await _userManager.AddClaimAsync(user, new Claim("Fullname", info.Principal.FindFirst(ClaimTypes.Name).Value));
+                    }
                     return LocalRedirect(returnUrl);
                 }
-
                 throw new Exception("External authentication error");
+            }
+            else
+            {
+                return LocalRedirect(returnUrl);
             }
         }
 

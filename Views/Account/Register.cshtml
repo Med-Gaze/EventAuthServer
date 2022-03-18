@@ -1,0 +1,80 @@
+﻿@model RegisterViewModel
+
+@section styles{
+    <style>
+        body .field-validation-error {
+            font-size: 9px !important;
+        }
+    </style>
+}
+
+@if (Model.EnableLocalLogin)
+{
+    <div class="login-page">
+        <div class="ms-content-wrapper ms-auth">
+            <div class="ms-auth-container">
+                <div class="ms-auth-col">
+                    <div class="ms-auth-bg"></div>
+                </div>
+                <div class="ms-auth-col">
+                    <div class="ms-auth-form">
+                        <form asp-route="Register" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="clearfix">
+                            <input type="hidden" asp-for="ReturnUrl" />
+                            <h1>Signup Form</h1>
+                            <div class="form-group mt-0 mb-0">
+                                <label>First name</label>
+                                <input type="text" class="form-control" asp-for="FirstName" autofocus placeholder="First name">
+                                <span asp-validation-for="FirstName" class="text-danger mt-2 ml-1"></span>
+                            </div>
+                            <div class="form-group mt-0 mb-0">
+                                <label>Middle name</label>
+                                <input type="text" class="form-control" asp-for="MiddleName" placeholder="Middle name">
+                                <span asp-validation-for="MiddleName" class="text-danger mt-2 ml-1"></span>
+                            </div>
+                            <div class="form-group mt-0 mb-0">
+                                <label>Last name</label>
+                                <input type="text" class="form-control" asp-for="LastName" placeholder="Last name">
+                                <span asp-validation-for="LastName" class="text-danger mt-2 ml-1"></span>
+                            </div>
+                            <div class="form-group mt-0 mb-0">
+                                <label>Called name</label>
+                                <input type="text" class="form-control" asp-for="CalledName" placeholder="Called name">
+                                <span asp-validation-for="CalledName" class="text-danger mt-2 ml-1"></span>
+                            </div>
+                            <div class="form-group mt-0 mb-0">
+                                <label>Email Address</label>
+                                <input type="email" class="form-control" asp-for="Email" placeholder="Email Address">
+                                <span asp-validation-for="Email" class="text-danger mt-2 ml-1"></span>
+                            </div>
+                            <div class="form-group mt-0 mb-0">
+                                <label>Password</label>
+                                <input type="password" class="form-control" asp-for="Password" placeholder="Password">
+                                <span asp-validation-for="Password" class="text-danger mt-2 ml-1"></span>
+                            </div>
+                            <button class="btn btn-primary mt-3 d-block w-100" type="submit">Create Account</button>
+                            <p class="mb-0 mt-3">
+                                Already Have an account? <a class="btn-link" asp-action="Login">
+                                    Login to
+                                    Account
+                                </a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+@if (!Model.EnableLocalLogin)
+{
+    <div class="alert alert-warning">
+        <strong>Invalid register request</strong>
+        There are no register schemes configured for this client.
+    </div>
+}
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

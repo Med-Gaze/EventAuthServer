@@ -11,7 +11,7 @@
             The interaction service provides a way for the UI to communicate with identityserver for validation and context retrieval
             </summary>
         </member>
-        <member name="M:EventAuthServer.Controllers.AccountController.#ctor(IdentityServer4.Services.IIdentityServerInteractionService,IdentityServer4.Stores.IClientStore,Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider,IdentityServer4.Services.IEventService,Microsoft.AspNetCore.Identity.UserManager{EventAuthServer.Entity.AppUserModel},Microsoft.AspNetCore.Identity.SignInManager{EventAuthServer.Entity.AppUserModel},Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:EventAuthServer.Controllers.AccountController.#ctor(IdentityServer4.Services.IIdentityServerInteractionService,IdentityServer4.Stores.IClientStore,Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider,IdentityServer4.Services.IEventService,Microsoft.AspNetCore.Identity.UserManager{EventAuthServer.Entity.AppUserModel},Microsoft.AspNetCore.Identity.SignInManager{EventAuthServer.Entity.AppUserModel},Microsoft.Extensions.Configuration.IConfiguration,med.common.library.configuration.service.IEmailService)">
             <summary>
             
             </summary>
@@ -22,6 +22,7 @@
             <param name="userManager"></param>
             <param name="signInManager"></param>
             <param name="configuration"></param>
+            <param name="emailService"></param>
         </member>
         <member name="M:EventAuthServer.Controllers.AccountController.Login(System.String)">
             <summary>

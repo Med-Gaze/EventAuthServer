@@ -13,6 +13,10 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
+using med.common.library.configuration.service;
+using med.common.library.constant;
+using med.common.library.Enum;
+using med.common.library.model;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -33,7 +37,7 @@ namespace EventAuthServer.Controllers
     /// The login service encapsulates the interactions with the user data store. This data store is in-memory only and cannot be used for production!
     /// The interaction service provides a way for the UI to communicate with identityserver for validation and context retrieval
     /// </summary>
-    [SecurityHeaders]
+    //[SecurityHeaders]
     [AllowAnonymous]
     public class AccountController : Controller
     {
@@ -44,6 +48,7 @@ namespace EventAuthServer.Controllers
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
         private readonly IConfiguration configuration;
+        private readonly IEmailService _emailService;
         /// <summary>
         /// 
         /// </summary>
@@ -54,6 +59,7 @@ namespace EventAuthServer.Controllers
         /// <param name="userManager"></param>
         /// <param name="signInManager"></param>
         /// <param name="configuration"></param>
+        /// <param name="emailService"></param>
         public AccountController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
@@ -61,7 +67,7 @@ namespace EventAuthServer.Controllers
             IEventService events,
             UserManager<AppUserModel> userManager,
             SignInManager<AppUserModel> signInManager,
-            IConfiguration configuration)
+            IConfiguration configuration, IEmailService emailService)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -72,6 +78,7 @@ namespace EventAuthServer.Controllers
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
             _events = events;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -317,6 +324,208 @@ namespace EventAuthServer.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> Register(string returnUrl)
+        {
+            // build a model so we know what to show on the login page
+            var vm = await BuildRegisterViewModelAsync(returnUrl);
+
+            if (vm.IsExternalLoginOnly)
+            {
+                // we only have one option for logging in and it's an external provider
+                return RedirectToAction("Challenge", "External", new { provider = vm.ExternalLoginScheme, returnUrl });
+            }
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            if (await this.userManager.FindByEmailAsync(model.Email) != null)
+            {
+                ModelState.AddModelError(string.Empty, "Use already registered with same email.");
+                var vm = await BuildRegisterViewModelAsync(model.ReturnUrl);
+                return View(vm);
+            }
+
+            var user = new AppUserModel
+            {
+                UserName = model.Email,
+                FullName = string.Join(" ", model.FirstName, model.MiddleName, model.LastName),
+                NickName = model.CalledName,
+                Email = model.Email,
+                LockoutEnabled = true,
+                NormalizedEmail = model.Email.ToUpper(),
+                NormalizedUserName = model.Email.ToUpper()
+            };
+
+            var userResult = await this.userManager.CreateAsync(user, model.Password);
+
+            if (!userResult.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, userResult.Errors.FirstOrDefault().Description);
+                var vm = await BuildRegisterViewModelAsync(model.ReturnUrl);
+                return View(vm);
+            }
+
+            var roleResult = await this.userManager.AddToRoleAsync(user, IdentityRoleConstant.Default.ToString());
+            if (!roleResult.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, userResult.Errors.FirstOrDefault().Description);
+                var vm = await BuildRegisterViewModelAsync(model.ReturnUrl);
+                return View(vm);
+            }
+            TempData["success"] = $"{model.Email} has created.";
+            return Redirect(model.ReturnUrl);
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel forgotPassword)
+        {
+            if (!ModelState.IsValid) return View(forgotPassword);
+
+            var user = await this.userManager.FindByEmailAsync(forgotPassword.Email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", $"{forgotPassword.Email} not found.");
+                return View();
+            }
+
+
+            var token = await this.userManager.GeneratePasswordResetTokenAsync(user);
+            var callBack = Url.Action(nameof(ResetPassword), "Account", new { token, email = user.Email }, Request.Scheme);
+            var confirmationLink = $"This is a link to reset your password." +
+                       $"<br/> Click Below! <br/>" +
+                       $"<a style='padding:12px 28px; margin-top:30px; border-radius: 4px; background-color: #4CAF50;" +
+                       $" color:#ffff;text-decoration: none;text-align: center;border: none;" +
+                       $"display: inline-block;cursor: pointer;' href = '{callBack}'>Click here to reset password</a>";
+
+            var emailConfig = this.configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+
+            var emailModel = new EmailViewModel(emailTo: user.Email, subject: "Reset Password Link",
+                  content: confirmationLink, contentType: (int)EmailContentTypeEnum.Html);
+
+            try
+            {
+                await _emailService.SendMail(emailModel, emailConfig);
+
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("Email", $"Server issue.");
+                return View();
+            }
+
+            TempData["success"] = $"{forgotPassword.Email} password reset link has send to email. please check it.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            var model = new ResetPasswordViewModel
+            {
+                Token = token,
+                Email = email
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await this.userManager.FindByEmailAsync(model.Email);
+            if (user == null) return NotFound($"{model.Email} not found.");
+
+            var resetPasswordResult = await this.userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+            if (!resetPasswordResult.Succeeded)
+            {
+                foreach (var error in resetPasswordResult.Errors)
+                {
+                    ModelState.TryAddModelError(error.Code, error.Description);
+                }
+                return View();
+            }
+
+            TempData["success"] = $"{model.Email} password has reset successfully.";
+
+            return RedirectToAction(nameof(Login));
+        }
+
+        private async Task<RegisterViewModel> BuildRegisterViewModelAsync(string returnUrl)
+        {
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            if (context?.IdP != null)
+            {
+                var local = context.IdP == IdentityServer4.IdentityServerConstants.LocalIdentityProvider;
+
+                // this is meant to short circuit the UI and only trigger the one external IdP
+                var vm = new RegisterViewModel
+                {
+                    EnableLocalLogin = local,
+                };
+
+                if (!local)
+                {
+                    vm.ExternalProviders = new[] { new ExternalProvider { AuthenticationScheme = context.IdP } };
+                }
+
+                return vm;
+            }
+
+            var schemes = await _schemeProvider.GetAllSchemesAsync();
+
+            var providers = schemes.Where(x => x.DisplayName != null || (x.Name.Equals(AccountOptions.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase))
+                )
+                .Select(x => new ExternalProvider
+                {
+                    DisplayName = x.DisplayName,
+                    AuthenticationScheme = x.Name
+                }).ToList();
+
+            var allowLocal = true;
+            if (context?.Client.ClientId != null)
+            {
+                var client = await _clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);
+                if (client != null)
+                {
+                    allowLocal = client.EnableLocalLogin;
+
+                    if (client.IdentityProviderRestrictions != null && client.IdentityProviderRestrictions.Any())
+                    {
+                        providers = providers.Where(provider => client.IdentityProviderRestrictions.Contains(provider.AuthenticationScheme)).ToList();
+                    }
+                }
+            }
+
+            return new RegisterViewModel
+            {
+                EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin,
+                ExternalProviders = providers.ToArray()
+            };
+        }
+
         /*****************************************/
         /* helper APIs for the AccountController */
         /*****************************************/
@@ -447,5 +656,6 @@ namespace EventAuthServer.Controllers
 
             return vm;
         }
+
     }
 }

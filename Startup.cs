@@ -137,6 +137,8 @@ namespace EventAuthServer
                 Configuration.GetSection("IdentityConfig:SocialMedia:Google");
                 options.ClientId = googleAuthNSection["ClientId"];
                 options.ClientSecret = googleAuthNSection["ClientSecret"];
+
+                options.SaveTokens = true;
             }).AddFacebook(options =>
             {
                 IConfigurationSection FBAuthNSection =
@@ -187,6 +189,7 @@ namespace EventAuthServer
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<ICryptography, Cryptography>();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
+            services.AddSingleton<IEmailService, EmailService>();
             services.AddHttpClient<IConfigurationService, ConfigurationService>()
                .SetHandlerLifetime(TimeSpan.FromMinutes(5));
         }
