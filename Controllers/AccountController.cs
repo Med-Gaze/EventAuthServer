@@ -52,8 +52,6 @@ namespace EventAuthServer.Controllers
         private readonly IEventService _events;
         private readonly IConfiguration configuration;
         private readonly IEmailService _emailService;
-        private readonly IAWSFileUploader _aWSFileUploader;
-        private readonly AppDbContext _appDbContext;
         /// <summary>
         /// 
         /// </summary>
@@ -65,8 +63,6 @@ namespace EventAuthServer.Controllers
         /// <param name="signInManager"></param>
         /// <param name="configuration"></param>
         /// <param name="emailService"></param>
-        /// <param name="aWSFileUploader"></param>
-        /// <param name="appDbContext"></param>
         public AccountController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
@@ -74,8 +70,7 @@ namespace EventAuthServer.Controllers
             IEventService events,
             UserManager<AppUserModel> userManager,
             SignInManager<AppUserModel> signInManager,
-            IConfiguration configuration, IEmailService emailService,
-            IAWSFileUploader aWSFileUploader, AppDbContext appDbContext)
+            IConfiguration configuration, IEmailService emailService)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -87,8 +82,7 @@ namespace EventAuthServer.Controllers
             _schemeProvider = schemeProvider;
             _events = events;
             _emailService = emailService;
-            _aWSFileUploader = aWSFileUploader;
-            _appDbContext = appDbContext;
+
         }
 
         /// <summary>
@@ -160,10 +154,9 @@ namespace EventAuthServer.Controllers
                     else
                         user = userByUserName;
                 }
-                // validate username/password against in-memory store
                 if (user != null)
                 {
-                    var result = await this.signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberLogin, lockoutOnFailure: true);
+                    var result = await this.signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberLogin, lockoutOnFailure: false);
                     int maxfailed = this.configuration.GetSection("JWTToken:MaxFailedAccess").Get<int>();
                     if (result.IsLockedOut)
                     {
@@ -365,7 +358,7 @@ namespace EventAuthServer.Controllers
 
             if (await this.userManager.FindByEmailAsync(model.Email) != null)
             {
-                ModelState.AddModelError(nameof(model.Email), "Use already registered with same email.");
+                ModelState.AddModelError(nameof(model.Email), "User already registered with same email.");
                 var vm = await BuildRegisterViewModelAsync(model.ReturnUrl);
                 return View(vm);
             }
@@ -378,7 +371,8 @@ namespace EventAuthServer.Controllers
                 Email = model.Email,
                 LockoutEnabled = true,
                 NormalizedEmail = model.Email.ToUpper(),
-                NormalizedUserName = model.Email.ToUpper()
+                NormalizedUserName = model.Email.ToUpper(),
+                Status = (int)AccountStatusEnum.Pending
             };
 
             var userResult = await this.userManager.CreateAsync(user, model.Password);
@@ -398,7 +392,7 @@ namespace EventAuthServer.Controllers
                 return View(vm);
             }
             var token = await this.userManager.GenerateEmailConfirmationTokenAsync(user);
-            var callBack = Url.Action(nameof(ConfirmEmail), "Account", new { token, email = user.Email }, Request.Scheme);
+            var callBack = Url.Action(nameof(ConfirmEmail), "Account", new { token, email = user.Email, returnUrl = model.ReturnUrl }, Request.Scheme);
             var confirmationLink = $"This is a link to confirm your account." +
                        $"<br/> Click Below! <br/>" +
                        $"<a style='padding:12px 28px; margin-top:30px; border-radius: 4px; background-color: #4CAF50;" +
@@ -426,9 +420,13 @@ namespace EventAuthServer.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ForgotPassword()
+        public IActionResult ForgotPassword(string returnUrl)
         {
-            return View();
+            var vm = new ForgotPasswordViewModel
+            {
+                ReturnUrl = returnUrl,
+            };
+            return View(vm);
         }
 
         [HttpPost]
@@ -443,12 +441,12 @@ namespace EventAuthServer.Controllers
             if (user == null)
             {
                 ModelState.AddModelError("Email", $"{forgotPassword.Email} not found.");
-                return View();
+                return View(forgotPassword);
             }
 
 
             var token = await this.userManager.GeneratePasswordResetTokenAsync(user);
-            var callBack = Url.Action(nameof(ResetPassword), "Account", new { token, email = user.Email }, Request.Scheme);
+            var callBack = Url.Action(nameof(ResetPassword), "Account", new { token, email = user.Email, returnUrl = forgotPassword.ReturnUrl }, Request.Scheme);
             var confirmationLink = $"This is a link to reset your password." +
                        $"<br/> Click Below! <br/>" +
                        $"<a style='padding:12px 28px; margin-top:30px; border-radius: 4px; background-color: #4CAF50;" +
@@ -472,17 +470,18 @@ namespace EventAuthServer.Controllers
             }
 
             TempData["success"] = $"{forgotPassword.Email} password reset link has send to email. please check it.";
-            return RedirectToAction(nameof(Login));
+            return Redirect(forgotPassword.ReturnUrl);
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ResetPassword(string token, string email)
+        public IActionResult ResetPassword(string token, string email, string returnUrl)
         {
             var model = new ResetPasswordViewModel
             {
                 Token = token,
-                Email = email
+                Email = email,
+                ReturnUrl = returnUrl
             };
 
             return View(model);
@@ -511,7 +510,7 @@ namespace EventAuthServer.Controllers
 
             TempData["success"] = $"{model.Email} password has reset successfully.";
 
-            return RedirectToAction(nameof(Login));
+            return RedirectToAction(nameof(Login), new { returnUrl = model.ReturnUrl });
         }
 
         [HttpGet]
@@ -528,7 +527,7 @@ namespace EventAuthServer.Controllers
                     if (user.EmailConfirmed)
                     {
                         TempData["success"] = $"{model.Email} already confirmed.";
-                        return RedirectToAction(nameof(Login));
+                        return RedirectToAction(nameof(Login), new { returnUrl = model.ReturnUrl });
                     }
                     var result = await this.userManager.ConfirmEmailAsync(user, token);
                     if (result.Succeeded)
@@ -536,11 +535,11 @@ namespace EventAuthServer.Controllers
                         user.Status = (int)AccountStatusEnum.Requested;
                         await this.userManager.UpdateAsync(user);
                         TempData["success"] = $"{model.Email} confirmed.";
-                        return RedirectToAction(nameof(Login));
+                        return RedirectToAction(nameof(Login), new { returnUrl = model.ReturnUrl });
                     }
                 }
             }
-            return RedirectToAction(nameof(Login));
+            return RedirectToAction(nameof(Login), new { returnUrl= model.ReturnUrl });
         }
 
 
@@ -548,7 +547,6 @@ namespace EventAuthServer.Controllers
         [Authorize]
         public IActionResult ChangePassword(string returnUrl)
         {
-
             return View(new ChangePasswordViewModel
             {
                 ReturnUrl = returnUrl
@@ -577,73 +575,10 @@ namespace EventAuthServer.Controllers
 
             TempData["success"] = $"{userEmail} password has changed.";
 
-            return RedirectToAction(nameof(Logout));
+            return Redirect(model.ReturnUrl);
         }
 
-        [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> UploadProfile([FromForm] IFormFile profileImage)
-        {
-            FileDriver entityFile = await FileUploadHelper.UploadFile(profileImage, "Logo", "User", _aWSFileUploader);
-            try
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                var entity = _appDbContext.Users.FirstOrDefault(x => x.Id == userId);
-
-                var fileDriverData = _appDbContext.FileDriver.Add(entityFile);
-
-                entity.FileId = entityFile.Id;
-
-                await _appDbContext.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Logout));
-            }
-            catch
-            {
-                if (!string.IsNullOrEmpty(entityFile.Path))
-                {
-                    if (!string.IsNullOrEmpty(entityFile.BucketName))
-                        await _aWSFileUploader.DeleteFile(entityFile.FileName, entityFile.BucketName);
-                    else
-                        FileDirectoryUploadHelper.DeleteFile(entityFile.Path);
-                }
-
-                throw;
-            }
-
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetUploadProfile(Guid? fileId)
-        {
-            string base64 = string.Empty;
-            var fileDetail = (from user in _appDbContext.Users
-                              join fileDriverTemp in _appDbContext.FileDriver on user.FileId equals fileDriverTemp.Id into Temp
-                              from fileDriver in Temp.DefaultIfEmpty()
-                              select new
-                              {
-                                  user.FileId,
-                                  FilePath = fileDriver.Path,
-                                  fileDriver.BucketName,
-                                  fileDriver.FileName
-                              }).Where(x => !x.FileId.Equals(null) && x.FileId == fileId).FirstOrDefault();
-            if (fileDetail != null)
-            {
-                var stream = await _aWSFileUploader.GetFile(fileDetail.FileName, fileDetail.BucketName);
-                byte[] bytes;
-                using (var memoryStream = new MemoryStream())
-                {
-                    stream.CopyTo(memoryStream);
-                    bytes = memoryStream.ToArray();
-                }
-                base64 = Convert.ToBase64String(bytes);
-            }
-
-            return Ok(base64);
-
-        }
         private async Task<RegisterViewModel> BuildRegisterViewModelAsync(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);

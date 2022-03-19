@@ -50,6 +50,35 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:EventAuthServer.Controllers.api.ValuesController.#ctor(Microsoft.Extensions.Logging.ILogger{EventAuthServer.Controllers.api.ValuesController})">
+            <summary>
+            
+            </summary>
+            <param name="logger"></param>
+        </member>
+        <member name="M:EventAuthServer.Controllers.api.ValuesController.Index">
+            <summary>
+            Return data without authorization
+            </summary>
+            <remarks>
+            Sample request:
+            
+                GET /api/v1/values/index
+                
+            </remarks>
+            <returns></returns>
+        </member>
+        <member name="M:EventAuthServer.Controllers.api.ValuesController.SecureIndex">
+            <summary>
+            Get an Current Document NameSpace.
+            </summary>
+            <remarks>
+            Sample request:
+            
+                GET /api/v1/values/secureindex
+                
+            </remarks>
+        </member>
         <member name="T:EventAuthServer.Controllers.ConsentController">
             <summary>
             This controller processes the consent UI

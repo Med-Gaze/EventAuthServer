@@ -42,7 +42,7 @@
                                     </label>
                                     <span asp-for="RememberLogin"> Remember Password </span>
                                     <label class="d-block mt-3">
-                                        <a  asp-action="ForgotPassword" class="btn-link">Forgot Password?</a>
+                                        <a  asp-action="ForgotPassword" asp-route-returnUrl="@Model.ReturnUrl" class="btn-link">Forgot Password?</a>
                                     </label>
                                 </div>
                             }
@@ -64,7 +64,7 @@
                                 </a>
                             }
                             <p class="mb-0 mt-3 text-center">
-                                Don't have an account? <a class="btn-link" asp-action="Register" asp-route-returnUrl="Login">Create Account</a>
+                                Don't have an account? <a class="btn-link" asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Create Account</a>
                             </p>
                         </form>
                     </div>

@@ -70,6 +70,7 @@ namespace EventAuthServer.Domains.ViewModels.Identity
         [EmailAddress]
         public string Email { get; set; }
         public string ResetUrl { get; set; }
+        public string ReturnUrl { get; set; }
     }
 
     public class ResetPasswordViewModel
@@ -89,6 +90,7 @@ namespace EventAuthServer.Domains.ViewModels.Identity
 
         [Required]
         public string Token { get; set; }
+        public string ReturnUrl { get; set; }
     }
     public class ChangePasswordViewModel
     {
@@ -113,6 +115,7 @@ namespace EventAuthServer.Domains.ViewModels.Identity
         public string Email { get; set; }
         [Required]
         public string Token { get; set; }
+        public string ReturnUrl { get; set; }
     }
     public class RegisterViewModel
     {

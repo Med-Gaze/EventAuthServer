@@ -1,3 +1,4 @@
+using EventAuthServer.Datum.Enum;
 using EventAuthServer.Domains.ViewModels.Identity;
 using EventAuthServer.Entity;
 using IdentityModel;
@@ -117,7 +118,9 @@ namespace EventAuthServer.Controllers
                             UserName = info.Principal.FindFirstValue(ClaimTypes.Email),
                             FullName = info.Principal.FindFirstValue(ClaimTypes.Name),
                             Email = info.Principal.FindFirstValue(ClaimTypes.Email),
-                            EmailConfirmed = true
+                            EmailConfirmed = true,
+                            Status = (int)AccountStatusEnum.Pending
+
                         };
 
                         await _userManager.CreateAsync(user);

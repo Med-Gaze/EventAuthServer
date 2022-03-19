@@ -95,7 +95,7 @@ namespace EventAuthServer
                 .AddDefaultTokenProviders();
 
             services.Configure<DataProtectionTokenProviderOptions>(options =>
-            options.TokenLifespan = TimeSpan.FromHours(1));
+            options.TokenLifespan = TimeSpan.FromDays(1));
 
 
             services.Configure<PasswordHasherOptions>(option =>
