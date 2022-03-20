@@ -92,7 +92,7 @@ namespace EventAuthServer
               {
                   webBuilder.UseStartup<Startup>();
                   webBuilder.UseContentRoot(Directory.GetCurrentDirectory());
-                  webBuilder.UseUrls("http://*:44321");
+                  webBuilder.UseUrls("https://*:44321");
                   webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
                   {
                       var env = hostingContext.HostingEnvironment;

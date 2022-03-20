@@ -33,12 +33,14 @@ namespace EventAuthServer
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            Environment = environment;
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Environment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -103,15 +105,18 @@ namespace EventAuthServer
                 option.IterationCount = 11250;
             });
 
-            services.AddIdentityServer()
+            var builder = services.AddIdentityServer()
             .AddAspNetIdentity<AppUserModel>()
             .AddInMemoryIdentityResources(ApiResourceClient.GetIdentityResources())
             .AddInMemoryApiScopes(ApiResourceClient.GetApiScopes())
             .AddInMemoryApiResources(ApiResourceClient.GetApiResources())
             .AddInMemoryClients(ApiResourceClient.GetClients())
-            .AddDeveloperSigningCredential()
             .AddProfileService<IdentityProfileService>();
 
+            if (Environment.IsDevelopment())
+            {
+                builder.AddDeveloperSigningCredential();
+            }
 
             services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -135,6 +140,9 @@ namespace EventAuthServer
             {
                 IConfigurationSection googleAuthNSection =
                 Configuration.GetSection("IdentityConfig:SocialMedia:Google");
+
+                options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+
                 options.ClientId = googleAuthNSection["ClientId"];
                 options.ClientSecret = googleAuthNSection["ClientSecret"];
 
@@ -143,6 +151,9 @@ namespace EventAuthServer
             {
                 IConfigurationSection FBAuthNSection =
                 Configuration.GetSection("IdentityConfig:SocialMedia:Facebook");
+
+                options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+
                 options.ClientId = FBAuthNSection["ClientId"];
                 options.ClientSecret = FBAuthNSection["ClientSecret"];
             }).AddCookie().AddLocalApi();

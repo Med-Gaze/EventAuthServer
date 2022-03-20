@@ -30,7 +30,7 @@ services:
     environment:
         - "ConnectionStrings__SQLConnection=Server=sqlserver;Database=Event_Identity;User=sa;Password=Admin@123;MultipleActiveResultSets=true"
         - ASPNETCORE_ENVIRONMENT=Development
-        - ASPNETCORE_URLS=http://+:80
+        - ASPNETCORE_URLS=https://+:443
 
     volumes:
         - ~/.aspnet/https:/https:ro
