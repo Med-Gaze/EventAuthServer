@@ -8,7 +8,6 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["EventAuthServer.csproj", "."]
-COPY ["../../med.common.api.library/med.common.api.library.csproj", "../../med.common.api.library/"]
 RUN dotnet restore "./EventAuthServer.csproj"
 COPY . .
 WORKDIR "/src/."

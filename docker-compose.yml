@@ -1,0 +1,41 @@
+version: '3.4'
+
+networks:
+    eventdev:
+      name: eventdev
+      driver: bridge
+
+services:
+
+  sqlserver:
+    container_name: sqlserver
+    image: mcr.microsoft.com/mssql/server
+    environment:
+      - "SA_PASSWORD=Admin@123"
+      - "ACCEPT_EULA=Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - eventdev
+    restart: on-failure
+  eventauthserver:
+    image: ${DOCKER_REGISTRY-}eventauthserver
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+        - '5050:44321'
+    #env_file:
+    #  - dev.env
+    environment:
+        - "ConnectionStrings__SQLConnection=Server=sqlserver;Database=Event_Identity;User=sa;Password=Admin@123;MultipleActiveResultSets=true"
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ASPNETCORE_URLS=http://+:80
+
+    volumes:
+        - ~/.aspnet/https:/https:ro
+    depends_on:
+        - sqlserver
+    networks:
+        - eventdev
+    restart: on-failure

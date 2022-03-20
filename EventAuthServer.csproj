@@ -47,6 +47,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="med.common.api.library" Version="1.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="5.0.15" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="5.0.15" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.11.1" />
@@ -105,12 +106,6 @@
 		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\svgs\regular\" />
 		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\svgs\solid\" />
 		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\webfonts\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="med.common.api.library">
-	    <HintPath>..\..\med.common.api.library\bin\Debug\net5.0\med.common.api.library.dll</HintPath>
-	  </Reference>
 	</ItemGroup>
 
 </Project>
