@@ -140,9 +140,6 @@ namespace EventAuthServer
             {
                 IConfigurationSection googleAuthNSection =
                 Configuration.GetSection("IdentityConfig:SocialMedia:Google");
-
-                options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-
                 options.ClientId = googleAuthNSection["ClientId"];
                 options.ClientSecret = googleAuthNSection["ClientSecret"];
 
@@ -151,9 +148,6 @@ namespace EventAuthServer
             {
                 IConfigurationSection FBAuthNSection =
                 Configuration.GetSection("IdentityConfig:SocialMedia:Facebook");
-
-                options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-
                 options.ClientId = FBAuthNSection["ClientId"];
                 options.ClientSecret = FBAuthNSection["ClientSecret"];
             }).AddCookie().AddLocalApi();

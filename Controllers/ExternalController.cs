@@ -31,9 +31,6 @@ namespace EventAuthServer.Controllers
     public class ExternalController : Controller
     {
         private readonly IIdentityServerInteractionService _interaction;
-        private readonly IClientStore _clientStore;
-        private readonly ILogger<ExternalController> _logger;
-        private readonly IEventService _events;
         private readonly SignInManager<AppUserModel> _signInManager;
         private readonly UserManager<AppUserModel> _userManager;
         /// <summary>
@@ -42,16 +39,11 @@ namespace EventAuthServer.Controllers
 
         public ExternalController(
             IIdentityServerInteractionService interaction,
-            IClientStore clientStore,
-            IEventService events,
-            ILogger<ExternalController> logger, SignInManager<AppUserModel> signInManager,
+            SignInManager<AppUserModel> signInManager,
             UserManager<AppUserModel> userManager
            )
         {
             _interaction = interaction;
-            _clientStore = clientStore;
-            _logger = logger;
-            _events = events;
             _signInManager = signInManager;
             _userManager = userManager;
         }
@@ -101,7 +93,7 @@ namespace EventAuthServer.Controllers
             var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider,
                 info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
 
-            if (signInResult.Succeeded)
+            if (!signInResult.Succeeded)
             {
                 // Get the email claim value
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
