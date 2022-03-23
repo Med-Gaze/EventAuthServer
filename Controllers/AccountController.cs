@@ -156,57 +156,61 @@ namespace EventAuthServer.Controllers
                     else
                     {
                         user = userByUserName;
-                        if (user != null)
+                    }
+                    
+                }
+
+                if (user != null)
+                {
+                    var result = await this.signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberLogin, lockoutOnFailure: false);
+                    int maxfailed = this.configuration.GetSection("JWTToken:MaxFailedAccess").Get<int>();
+                    if (result.IsLockedOut)
+                    {
+                        await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "Account has been locked.", clientId: context?.Client.ClientId));
+                        ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
+                    }
+                    else if (result.IsNotAllowed)
+                    {
+                        await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, $"Not allowed to login for {model.Username}", clientId: context?.Client.ClientId));
+                        ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
+                    }
+                    else if (result.RequiresTwoFactor)
+                    {
+                        await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, $"Required two factor login process for { model.Username}", clientId: context?.Client.ClientId));
+                        ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
+                    }
+                    else if (!result.Succeeded)
+                    {
+                        await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, $"Invalid Credentials for '{model.Username}'. Account will have locked after { maxfailed - user.AccessFailedCount} wrong attempt", clientId: context?.Client.ClientId));
+                        ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
+                    }
+                    else
+                    {
+                        await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName, clientId: context?.Client.ClientId));
+                        // only set explicit expiration here if user chooses "remember me". 
+                        // otherwise we rely upon expiration configured in cookie middleware.
+                        AuthenticationProperties props = null;
+                        if (AccountOptions.AllowRememberLogin && model.RememberLogin)
                         {
-                            var result = await this.signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberLogin, lockoutOnFailure: false);
-                            int maxfailed = this.configuration.GetSection("JWTToken:MaxFailedAccess").Get<int>();
-                            if (result.IsLockedOut)
+                            props = new AuthenticationProperties
                             {
-                                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "Account has been locked.", clientId: context?.Client.ClientId));
-                                ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
-                            }
-                            else if (result.IsNotAllowed)
-                            {
-                                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, $"Not allowed to login for {model.Username}", clientId: context?.Client.ClientId));
-                                ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
-                            }
-                            else if (result.RequiresTwoFactor)
-                            {
-                                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, $"Required two factor login process for { model.Username}", clientId: context?.Client.ClientId));
-                                ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
-                            }
-                            else if (!result.Succeeded)
-                            {
-                                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, $"Invalid Credentials for '{model.Username}'. Account will have locked after { maxfailed - user.AccessFailedCount} wrong attempt", clientId: context?.Client.ClientId));
-                                ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
-                            }
-                            else
-                            {
-                                await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName, clientId: context?.Client.ClientId));
-                                // only set explicit expiration here if user chooses "remember me". 
-                                // otherwise we rely upon expiration configured in cookie middleware.
-                                AuthenticationProperties props = null;
-                                if (AccountOptions.AllowRememberLogin && model.RememberLogin)
-                                {
-                                    props = new AuthenticationProperties
-                                    {
-                                        IsPersistent = true,
-                                        ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
-                                    };
-                                };
+                                IsPersistent = true,
+                                ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
+                            };
+                        };
 
-                                // issue authentication cookie with subject ID and username
-                                var isuser = new IdentityServerUser(user.Id)
-                                {
-                                    DisplayName = user.UserName
-                                };
+                        // issue authentication cookie with subject ID and username
+                        var isuser = new IdentityServerUser(user.Id)
+                        {
+                            DisplayName = user.UserName
+                        };
 
-                                var hasClientCall = HttpContext.Request.QueryString.HasValue && HttpContext.Request.QueryString.Value.Contains("client_id");
+                        var hasClientCall = HttpContext.Request.QueryString.HasValue && HttpContext.Request.QueryString.Value.Contains("client_id");
 
-                                if (!hasClientCall)
-                                {
-                                    var role = await this.userManager.GetRolesAsync(user);
-                                    var claims = new List<Claim>
+                        if (!hasClientCall)
+                        {
+                            var role = await this.userManager.GetRolesAsync(user);
+                            var claims = new List<Claim>
                             {
                             new Claim(ClaimTypes.Name, user.UserName),
                             new Claim(JwtClaimTypes.Subject, user.Id),
@@ -214,50 +218,48 @@ namespace EventAuthServer.Controllers
                             new Claim(ClaimTypes.Role, role.FirstOrDefault()),
                             };
 
-                                    var claimsIdentity = new ClaimsIdentity(
-                                        claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                            var claimsIdentity = new ClaimsIdentity(
+                                claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-                                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), props);
-                                }
-                                else
-                                {
-                                    await HttpContext.SignInAsync(isuser, props);
-                                }
-                                if (context != null)
-                                {
-                                    if (context.IsNativeClient())
-                                    {
-                                        // The client is native, so this change in how to
-                                        // return the response is for better UX for the end user.
-                                        return this.LoadingPage("Redirect", model.ReturnUrl);
-                                    }
-
-                                    // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                                    return Redirect(model.ReturnUrl);
-                                }
-                                // request for a local page
-                                if (Url.IsLocalUrl(model.ReturnUrl))
-                                {
-                                    return Redirect(model.ReturnUrl);
-                                }
-                                else if (string.IsNullOrEmpty(model.ReturnUrl))
-                                {
-                                    return Redirect("~/");
-                                }
-                                else
-                                {
-                                    // user might have clicked on a malicious link - should be logged
-                                    throw new Exception("invalid return URL");
-                                }
-                            }
+                            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), props);
                         }
                         else
                         {
-                            await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId: context?.Client.ClientId));
-                            ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
+                            await HttpContext.SignInAsync(isuser, props);
+                        }
+                        if (context != null)
+                        {
+                            if (context.IsNativeClient())
+                            {
+                                // The client is native, so this change in how to
+                                // return the response is for better UX for the end user.
+                                return this.LoadingPage("Redirect", model.ReturnUrl);
+                            }
 
+                            // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+                            return Redirect(model.ReturnUrl);
+                        }
+                        // request for a local page
+                        if (Url.IsLocalUrl(model.ReturnUrl))
+                        {
+                            return Redirect(model.ReturnUrl);
+                        }
+                        else if (string.IsNullOrEmpty(model.ReturnUrl))
+                        {
+                            return Redirect("~/");
+                        }
+                        else
+                        {
+                            // user might have clicked on a malicious link - should be logged
+                            throw new Exception("invalid return URL");
                         }
                     }
+                }
+                else
+                {
+                    await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId: context?.Client.ClientId));
+                    ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
+
                 }
 
             }
