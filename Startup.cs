@@ -219,7 +219,6 @@ namespace EventAuthServer
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
-            //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             #region swagger configuration 
@@ -252,6 +251,7 @@ namespace EventAuthServer
             app.UseRouting();
 
             app.UseCors(CorsPolicyParam.CorsPolicyName);
+
             app.UseIdentityServer();
 
             app.UseAuthorization();
