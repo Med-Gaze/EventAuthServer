@@ -33,6 +33,7 @@ namespace EventAuthServer.Helper
             var user = await _userManager.FindByIdAsync(userId);
             var role = await _userManager.GetRolesAsync(user);
             var fileId = user.FileId.HasValue ? user.FileId.ToString() : string.Empty;
+           
             userClaims.AddRange(new List<Claim>
             {
                 new Claim(ClaimTypes.Role, role.FirstOrDefault()),
@@ -42,6 +43,7 @@ namespace EventAuthServer.Helper
                 new Claim("Email", user.Email),
                 new Claim("PhoneNumber", user.PhoneNumber??string.Empty),
             });
+
             context.IssuedClaims.AddRange(userClaims);
         }
 
@@ -51,5 +53,6 @@ namespace EventAuthServer.Helper
             var user = await _userManager.FindByIdAsync(sub);
             context.IsActive = user != null;
         }
+       
     }
 }

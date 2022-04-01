@@ -2,6 +2,7 @@ using EventAuthServer.Datum.Static;
 using EventAuthServer.Entity;
 using EventAuthServer.Helper;
 using IdentityServer4;
+using IdentityServer4.Services;
 using med.common.api.library.fileupload;
 using med.common.library.configuration;
 using med.common.library.configuration.service;
@@ -189,7 +190,7 @@ namespace EventAuthServer
             var hasAWSStorage = Configuration.GetSection("AWSConfig:Storage").Exists();
             if (hasAWSStorage)
                 services.AddSingleton<IAWSFileUploader, AWSFileUploader>();
-
+            services.AddTransient<IProfileService, IdentityProfileService>();
             services.AddSingleton<IConfigureOptions<SwaggerGenOptions>, Swagger>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<ICryptography, Cryptography>();
