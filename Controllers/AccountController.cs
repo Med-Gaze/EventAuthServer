@@ -40,8 +40,8 @@ namespace EventAuthServer.Controllers
     /// The login service encapsulates the interactions with the user data store. This data store is in-memory only and cannot be used for production!
     /// The interaction service provides a way for the UI to communicate with identityserver for validation and context retrieval
     /// </summary>
-    //[SecurityHeaders]
-
+    /// 
+    [SecurityHeaders]
     public class AccountController : Controller
     {
         private readonly UserManager<AppUserModel> userManager;
@@ -63,6 +63,8 @@ namespace EventAuthServer.Controllers
         /// <param name="signInManager"></param>
         /// <param name="configuration"></param>
         /// <param name="emailService"></param>
+        /// 
+       
         public AccountController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
@@ -379,6 +381,7 @@ namespace EventAuthServer.Controllers
                 LockoutEnabled = true,
                 NormalizedEmail = model.Email.ToUpper(),
                 NormalizedUserName = model.Email.ToUpper(),
+                PhoneNumber = model.PhoneNumber,
                 Status = (int)AccountStatusEnum.Pending
             };
 
@@ -635,7 +638,8 @@ namespace EventAuthServer.Controllers
             return new RegisterViewModel
             {
                 EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin,
-                ExternalProviders = providers.ToArray()
+                ExternalProviders = providers.ToArray(),
+                ReturnUrl = returnUrl
             };
         }
 

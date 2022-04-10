@@ -140,6 +140,8 @@ namespace EventAuthServer.Domains.ViewModels.Identity
         [Display(Name = "Password")]
         public string Password { get; set; }
 
+        [Required]
+        public string PhoneNumber { get; set; }
         public string ReturnUrl { get; set; }
         public bool EnableLocalLogin { get; set; } = true;
         public IEnumerable<ExternalProvider> ExternalProviders { get; set; } = Enumerable.Empty<ExternalProvider>();
