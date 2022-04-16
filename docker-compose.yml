@@ -1,0 +1,25 @@
+version: '3.4'
+
+networks:
+    authdev:
+      name: authdev
+      driver: bridge
+
+services:
+  eventauthserver:
+    image: saugatdahal20/event_server_20:latest
+    build:
+      context: .
+      dockerfile: EventAuthServer/Dockerfile
+    ports:
+        - '5050:44321'
+    environment:
+        - "ConnectionStrings__SQLConnection=Server=165.227.217.50,1433;Database=Event_Identity;User=sa;Password=1Saugat#9004#A;MultipleActiveResultSets=true"
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ASPNETCORE_URLS=http://+:80
+
+    volumes:
+        - ~/.aspnet/https:/https:ro
+    networks:
+        - authdev
+    restart: on-failure

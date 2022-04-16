@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
-    <ProjectGuid>aaac690f-3ed7-4552-824d-f46132416cf3</ProjectGuid>
+    <ProjectGuid>b97ac53b-59c1-4076-8919-318271c19fcc</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
     <DockerServiceName>eventauthserver</DockerServiceName>
