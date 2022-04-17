@@ -138,11 +138,7 @@ namespace EventAuthServer
             });
 
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-              
-            }).AddGoogle(options =>
+            services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme).AddGoogle(options =>
             {
                 IConfigurationSection googleAuthNSection =
                 Configuration.GetSection("IdentityConfig:SocialMedia:Google");
@@ -161,7 +157,6 @@ namespace EventAuthServer
                 options.Cookie.SameSite = SameSiteMode.None;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.Cookie.IsEssential = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
                 options.SlidingExpiration = true;
                 options.AccessDeniedPath = "/Forbidden/";
             }).AddLocalApi();
