@@ -8,6 +8,7 @@ using med.common.library.configuration;
 using med.common.library.configuration.service;
 using med.common.library.security;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -137,7 +138,11 @@ namespace EventAuthServer
             });
 
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddGoogle(options =>
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+              
+            }).AddGoogle(options =>
             {
                 IConfigurationSection googleAuthNSection =
                 Configuration.GetSection("IdentityConfig:SocialMedia:Google");
@@ -151,7 +156,15 @@ namespace EventAuthServer
                 Configuration.GetSection("IdentityConfig:SocialMedia:Facebook");
                 options.ClientId = FBAuthNSection["ClientId"];
                 options.ClientSecret = FBAuthNSection["ClientSecret"];
-            }).AddCookie().AddLocalApi();
+            }).AddCookie(options =>
+            {
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.IsEssential = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+                options.SlidingExpiration = true;
+                options.AccessDeniedPath = "/Forbidden/";
+            }).AddLocalApi();
 
             services.AddAuthorization(options =>
             {
@@ -254,6 +267,9 @@ namespace EventAuthServer
             app.UseCors(CorsPolicyParam.CorsPolicyName);
 
             app.UseIdentityServer();
+
+            app.UseCookiePolicy();
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
