@@ -124,7 +124,7 @@ namespace EventAuthServer
 
             builder.AddDeveloperSigningCredential();
 
-           
+
             services.AddAuthentication(IdentityServerConstants.DefaultCookieAuthenticationScheme).AddGoogle(options =>
            {
                IConfigurationSection googleAuthNSection =
@@ -141,8 +141,9 @@ namespace EventAuthServer
                options.ClientSecret = FBAuthNSection["ClientSecret"];
            }).AddCookie().AddLocalApi();
 
-            services.ConfigureApplicationCookie(options => {
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromDays(2);
                 options.SlidingExpiration = true;
             });
 
