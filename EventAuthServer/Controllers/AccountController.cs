@@ -64,7 +64,7 @@ namespace EventAuthServer.Controllers
         /// <param name="configuration"></param>
         /// <param name="emailService"></param>
         /// 
-       
+
         public AccountController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
@@ -159,7 +159,7 @@ namespace EventAuthServer.Controllers
                     {
                         user = userByUserName;
                     }
-                    
+
                 }
 
                 if (user != null)
@@ -191,20 +191,16 @@ namespace EventAuthServer.Controllers
                         await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName, clientId: context?.Client.ClientId));
                         // only set explicit expiration here if user chooses "remember me". 
                         // otherwise we rely upon expiration configured in cookie middleware.
-                        AuthenticationProperties props = null;
-                        if (AccountOptions.AllowRememberLogin)
+                        AuthenticationProperties props = new()
                         {
-                            props = new AuthenticationProperties
-                            {
-                                IsPersistent = model.RememberLogin,
-                                ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
-                            };
+                            IsPersistent = model.RememberLogin,
+                            ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
                         };
 
                         // issue authentication cookie with subject ID and username
                         var isuser = new IdentityServerUser(user.Id)
                         {
-                            DisplayName = user.UserName
+                            DisplayName = user.UserName,
                         };
 
                         var hasClientCall = HttpContext.Request.QueryString.HasValue && HttpContext.Request.QueryString.Value.Contains("client_id");
@@ -221,9 +217,9 @@ namespace EventAuthServer.Controllers
                             };
 
                             var claimsIdentity = new ClaimsIdentity(
-                                claims, IdentityServerConstants.LocalApi.AuthenticationScheme);
+                                claims, IdentityServerConstants.DefaultCookieAuthenticationScheme);
 
-                            await HttpContext.SignInAsync(IdentityServerConstants.LocalApi.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), props);
+                            await HttpContext.SignInAsync(IdentityServerConstants.DefaultCookieAuthenticationScheme, new ClaimsPrincipal(claimsIdentity), props);
                         }
                         else
                         {

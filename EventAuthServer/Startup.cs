@@ -107,7 +107,14 @@ namespace EventAuthServer
                 option.IterationCount = 11250;
             });
 
-            var builder = services.AddIdentityServer()
+            var builder = services.AddIdentityServer(options =>
+            {
+                options.Events.RaiseErrorEvents = true;
+                options.Events.RaiseInformationEvents = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseSuccessEvents = true;
+                options.EmitStaticAudienceClaim = true;
+            })
             .AddAspNetIdentity<AppUserModel>()
             .AddInMemoryIdentityResources(ApiResourceClient.GetIdentityResources())
             .AddInMemoryApiScopes(ApiResourceClient.GetApiScopes())
@@ -115,10 +122,39 @@ namespace EventAuthServer
             .AddInMemoryClients(ApiResourceClient.GetClients())
             .AddProfileService<IdentityProfileService>();
 
-            if (Environment.IsDevelopment())
+            builder.AddDeveloperSigningCredential();
+
+           
+            services.AddAuthentication(IdentityServerConstants.DefaultCookieAuthenticationScheme).AddGoogle(options =>
+           {
+               IConfigurationSection googleAuthNSection =
+               Configuration.GetSection("IdentityConfig:SocialMedia:Google");
+               options.ClientId = googleAuthNSection["ClientId"];
+               options.ClientSecret = googleAuthNSection["ClientSecret"];
+
+               options.SaveTokens = true;
+           }).AddFacebook(options =>
+           {
+               IConfigurationSection FBAuthNSection =
+               Configuration.GetSection("IdentityConfig:SocialMedia:Facebook");
+               options.ClientId = FBAuthNSection["ClientId"];
+               options.ClientSecret = FBAuthNSection["ClientSecret"];
+           }).AddCookie().AddLocalApi();
+
+            services.ConfigureApplicationCookie(options => {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                options.SlidingExpiration = true;
+            });
+
+            services.AddAuthorization(options =>
             {
-                builder.AddDeveloperSigningCredential();
-            }
+                options.AddPolicy(IdentityServerConstants.LocalApi.PolicyName, policy =>
+                {
+                    policy.AddAuthenticationSchemes(IdentityServerConstants.DefaultCookieAuthenticationScheme);
+                    policy.RequireAuthenticatedUser();
+                    // custom requirements
+                });
+            });
 
             services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -137,39 +173,6 @@ namespace EventAuthServer
                 options.ForwardClientCertificate = false;
             });
 
-
-            services.AddAuthentication(IdentityServerConstants.DefaultCookieAuthenticationScheme).AddGoogle(options =>
-           {
-               IConfigurationSection googleAuthNSection =
-               Configuration.GetSection("IdentityConfig:SocialMedia:Google");
-               options.ClientId = googleAuthNSection["ClientId"];
-               options.ClientSecret = googleAuthNSection["ClientSecret"];
-
-               options.SaveTokens = true;
-           }).AddFacebook(options =>
-           {
-               IConfigurationSection FBAuthNSection =
-               Configuration.GetSection("IdentityConfig:SocialMedia:Facebook");
-               options.ClientId = FBAuthNSection["ClientId"];
-               options.ClientSecret = FBAuthNSection["ClientSecret"];
-           }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-             {
-                 options.Cookie.SameSite = SameSiteMode.None;
-                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                 options.Cookie.IsEssential = true;
-                 options.SlidingExpiration = true;
-                 options.AccessDeniedPath = "/Forbidden/";
-             }).AddLocalApi();
-
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy(IdentityServerConstants.LocalApi.PolicyName, policy =>
-                {
-                    policy.AddAuthenticationSchemes(IdentityServerConstants.LocalApi.AuthenticationScheme);
-                    policy.RequireAuthenticatedUser();
-                    // custom requirements
-                });
-            });
 
             services.AddSwaggerGen();
 
@@ -264,7 +267,7 @@ namespace EventAuthServer
             app.UseIdentityServer();
 
             app.UseCookiePolicy();
-            
+
             app.UseAuthorization();
 
             app.UseSerilogRequestLogging();
