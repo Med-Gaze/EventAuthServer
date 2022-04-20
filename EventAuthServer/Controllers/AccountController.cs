@@ -192,11 +192,11 @@ namespace EventAuthServer.Controllers
                         // only set explicit expiration here if user chooses "remember me". 
                         // otherwise we rely upon expiration configured in cookie middleware.
                         AuthenticationProperties props = null;
-                        if (AccountOptions.AllowRememberLogin && model.RememberLogin)
+                        if (AccountOptions.AllowRememberLogin)
                         {
                             props = new AuthenticationProperties
                             {
-                                IsPersistent = true,
+                                IsPersistent = model.RememberLogin,
                                 ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
                             };
                         };
@@ -221,9 +221,9 @@ namespace EventAuthServer.Controllers
                             };
 
                             var claimsIdentity = new ClaimsIdentity(
-                                claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                                claims, IdentityServerConstants.LocalApi.AuthenticationScheme);
 
-                            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), props);
+                            await HttpContext.SignInAsync(IdentityServerConstants.LocalApi.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), props);
                         }
                         else
                         {

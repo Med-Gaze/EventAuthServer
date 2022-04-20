@@ -37,6 +37,7 @@ namespace EventAuthServer.Helper
             userClaims.AddRange(new List<Claim>
             {
                 new Claim(ClaimTypes.Role, role.FirstOrDefault()),
+                new Claim("Role", role.FirstOrDefault()),
                 new Claim("FullName", user.FullName),
                 new Claim("NickName", user.NickName??string.Empty),
                 new Claim("ProfileFileId", fileId),

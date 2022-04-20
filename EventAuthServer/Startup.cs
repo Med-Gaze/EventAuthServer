@@ -138,28 +138,28 @@ namespace EventAuthServer
             });
 
 
-            services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme).AddGoogle(options =>
-            {
-                IConfigurationSection googleAuthNSection =
-                Configuration.GetSection("IdentityConfig:SocialMedia:Google");
-                options.ClientId = googleAuthNSection["ClientId"];
-                options.ClientSecret = googleAuthNSection["ClientSecret"];
+            services.AddAuthentication(IdentityServerConstants.DefaultCookieAuthenticationScheme).AddGoogle(options =>
+           {
+               IConfigurationSection googleAuthNSection =
+               Configuration.GetSection("IdentityConfig:SocialMedia:Google");
+               options.ClientId = googleAuthNSection["ClientId"];
+               options.ClientSecret = googleAuthNSection["ClientSecret"];
 
-                options.SaveTokens = true;
-            }).AddFacebook(options =>
-            {
-                IConfigurationSection FBAuthNSection =
-                Configuration.GetSection("IdentityConfig:SocialMedia:Facebook");
-                options.ClientId = FBAuthNSection["ClientId"];
-                options.ClientSecret = FBAuthNSection["ClientSecret"];
-            }).AddCookie(options =>
-            {
-                options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.Cookie.IsEssential = true;
-                options.SlidingExpiration = true;
-                options.AccessDeniedPath = "/Forbidden/";
-            }).AddLocalApi();
+               options.SaveTokens = true;
+           }).AddFacebook(options =>
+           {
+               IConfigurationSection FBAuthNSection =
+               Configuration.GetSection("IdentityConfig:SocialMedia:Facebook");
+               options.ClientId = FBAuthNSection["ClientId"];
+               options.ClientSecret = FBAuthNSection["ClientSecret"];
+           }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+             {
+                 options.Cookie.SameSite = SameSiteMode.None;
+                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                 options.Cookie.IsEssential = true;
+                 options.SlidingExpiration = true;
+                 options.AccessDeniedPath = "/Forbidden/";
+             }).AddLocalApi();
 
             services.AddAuthorization(options =>
             {
@@ -264,8 +264,7 @@ namespace EventAuthServer
             app.UseIdentityServer();
 
             app.UseCookiePolicy();
-            app.UseAuthentication();
-
+            
             app.UseAuthorization();
 
             app.UseSerilogRequestLogging();
