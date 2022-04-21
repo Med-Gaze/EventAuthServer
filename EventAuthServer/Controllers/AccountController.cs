@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using EventAuthServer;
 using EventAuthServer.Datum.Enum;
 using EventAuthServer.Datum.Static;
 using EventAuthServer.Domains.ViewModels.Identity;
@@ -14,13 +13,11 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
-using med.common.api.library.fileupload;
 using med.common.library.configuration.service;
 using med.common.library.constant;
 using med.common.library.Enum;
 using med.common.library.model;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -28,7 +25,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -469,9 +465,9 @@ namespace EventAuthServer.Controllers
                 await _emailService.SendMail(emailModel, emailConfig);
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ModelState.AddModelError("Email", $"Server issue.");
+                ModelState.AddModelError("Email", $"{ex.Message}");
                 return View();
             }
 

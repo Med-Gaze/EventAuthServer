@@ -65,7 +65,7 @@ namespace EventAuthServer
                         var userManager = services.GetRequiredService<UserManager<AppUserModel>>();
                         var roleManager = services.GetRequiredService<RoleManager<IdentityRole<string>>>();
 
-                        ModelBuilderExtensionsHelper.SeedData(context, userManager, roleManager).Wait();
+                        ModelBuilderExtensionsHelper.SeedData(context, userManager, roleManager, config).Wait();
                     }
                 }
                 catch (Exception ex)

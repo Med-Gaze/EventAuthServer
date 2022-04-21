@@ -81,7 +81,7 @@ namespace EventAuthServer
 
                 // Lockout settings.
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(1);
-                options.Lockout.MaxFailedAccessAttempts = Configuration.GetSection("JWTToken:MaxFailedAccess").Get<int>();
+                options.Lockout.MaxFailedAccessAttempts = Configuration.GetSection("IdentityConfig:MaxFailedAccess").Get<int>();
                 options.Lockout.AllowedForNewUsers = true;
 
                 // User settings.
@@ -131,7 +131,6 @@ namespace EventAuthServer
                Configuration.GetSection("IdentityConfig:SocialMedia:Google");
                options.ClientId = googleAuthNSection["ClientId"];
                options.ClientSecret = googleAuthNSection["ClientSecret"];
-
                options.SaveTokens = true;
            }).AddFacebook(options =>
            {
@@ -139,11 +138,12 @@ namespace EventAuthServer
                Configuration.GetSection("IdentityConfig:SocialMedia:Facebook");
                options.ClientId = FBAuthNSection["ClientId"];
                options.ClientSecret = FBAuthNSection["ClientSecret"];
+               options.SaveTokens = true;
            }).AddCookie().AddLocalApi();
 
             services.ConfigureApplicationCookie(options =>
             {
-                options.ExpireTimeSpan = TimeSpan.FromDays(2);
+                options.ExpireTimeSpan = TimeSpan.FromDays(7);
                 options.SlidingExpiration = true;
             });
 
@@ -179,14 +179,14 @@ namespace EventAuthServer
 
             services.RegisterApiVersion();
 
-            var HostingEnvironment = Configuration.GetSection("CorsSiteConfiguration").GetChildren().Select(x => x.Value).ToArray();
+            var corsConfiguration = Configuration.GetSection("CorsSiteConfiguration").GetChildren().Select(x => x.Value).ToArray();
 
             services.AddCors(options =>
             {
                 options.AddPolicy(CorsPolicyParam.CorsPolicyName,
                 builder =>
                 {
-                    builder.WithOrigins(HostingEnvironment).AllowAnyHeader().SetIsOriginAllowedToAllowWildcardSubdomains().AllowAnyMethod();
+                    builder.WithOrigins(corsConfiguration).AllowAnyHeader().SetIsOriginAllowedToAllowWildcardSubdomains().AllowAnyMethod();
                 });
             });
 

@@ -2,6 +2,7 @@
 using EventAuthServer.infrastructure.library.Persistence.SeedData;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
 
@@ -16,12 +17,12 @@ namespace EventAuthServer.ModelBuilderExtension
         }
         public static async Task SeedData(AppDbContext context,
             UserManager<AppUserModel> userManager,
-            RoleManager<IdentityRole<string>> roleManager)
+            RoleManager<IdentityRole<string>> roleManager, IConfiguration config)
         {
             try
             {
                 await SeedRole.SeedData(context, roleManager);
-                await SeedUser.SeedData(context, userManager);
+                await SeedUser.SeedData(context, userManager, config);
                 SeedApiResourceClient.SeedData(context);
                 await context.SaveChangesAsync();
             }
