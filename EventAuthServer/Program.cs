@@ -12,11 +12,8 @@ using Serilog.Exceptions;
 using Serilog.Formatting.Compact;
 using Serilog.Sinks.Elasticsearch;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace EventAuthServer
 {
@@ -30,7 +27,8 @@ namespace EventAuthServer
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile(
                     $"appsettings.{environment}.json",
-                    optional: true)
+                    optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
                 .Build();
 
             // Create the Serilog logger, and configure the sinks
@@ -92,7 +90,7 @@ namespace EventAuthServer
               {
                   webBuilder.UseStartup<Startup>();
                   webBuilder.UseContentRoot(Directory.GetCurrentDirectory());
-                  webBuilder.UseUrls("https://*:44321");
+                  webBuilder.UseUrls("http://*:44321");
                   webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
                   {
                       var env = hostingContext.HostingEnvironment;

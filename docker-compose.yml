@@ -7,50 +7,52 @@ networks:
 
 services:
   eventauthserver:
-    image: saugatdahal20/event_server_20:latest
+    image: saugatdahal20/auth_server:latest
+   
     build:
       context: .
       dockerfile: EventAuthServer/Dockerfile
     ports:
-        - '5050:44321'
+        - '45320:44321'
     environment:
-        - "ConnectionStrings__SQLConnection=Server=165.227.217.50,1433;Database=authorization_control;User=sa;Password=1Saugat#9004#A;MultipleActiveResultSets=true"
-        - ASPNETCORE_ENVIRONMENT=Production
-        - ASPNETCORE_URLS=http://+:80
-        # identity config for facebook and google login
-        - IdentityConfig__SocialMedia__Google__ClientId = 200334325363-bc8oh611hrl2qiii4m4tnfn0cdad3ef6.apps.googleusercontent.com
-        - IdentityConfig__SocialMedia__Google__ClientSecret = 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
-        - IdentityConfig__SocialMedia__Facebook__ClientId = 357633596280067
-        - IdentityConfig__SocialMedia__Facebook__ClientSecret = ec46a736c9e97fda534a96b3d4595df4
-        - IdentityConfig__MaxFailedAccess = 5
+        ConnectionStrings__SQLConnection: 'Server=165.227.217.50,1433;Database=authorization_control;User=sa;Password=1Saugat#9004#A;MultipleActiveResultSets= true'
+         # identity config for facebook and google login
+        IdentityConfig__SocialMedia__Google__ClientId :  '200334325363-bc8oh611hrl2qiii4m4tnfn0cdad3ef6.apps.googleusercontent.com'
+        IdentityConfig__SocialMedia__Google__ClientSecret :  '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'
+        IdentityConfig__SocialMedia__Facebook__ClientId :  '357633596280067'
+        IdentityConfig__SocialMedia__Facebook__ClientSecret :  'ec46a736c9e97fda534a96b3d4595df4'
+        IdentityConfig__MaxFailedAccess :  5
         #module config to define module
-        - ModuleConfig__BaseUrl = https://auth.eventcastify.com
-        - ModuleConfig__Email = eventcastify@gmail.com
-        - ModuleConfig__MaxApiExecutionTimeInMs = 500
-        - ModuleConfig__CompanyName = WebHillTech LLC
+        ModuleConfig__BaseUrl :  'https://auth.eventcastify.com'
+        ModuleConfig__Email :  'eventcastify@gmail.com'
+        ModuleConfig__MaxApiExecutionTimeInMs :  500
+        ModuleConfig__LocalRun :  false
+        ModuleConfig__CompanyName :  'WebHillTech LLC'
         #Database config for database control
-        - DbConfig__Migrate = true
-        - DbConfig__Seed = true
-        - DbConfig__Tanent = false
+        DbConfig__Migrate :  true
+        DbConfig__Seed :  true
+        DbConfig__Tanent :  false
         #cryptography mechanism text
-        - CryptoConfig__SecretKey = IAMwebhilltecheventcastifyappwhereigo
-        - CryptoConfig__SecretIv = GoToHellMyLove
+        CryptoConfig__SecretKey :  'IAMwebhilltecheventcastifyappwhereigo'
+        CryptoConfig__SecretIv :  'GoToHellMyLove'
         #elastic search configuration
-        - ElasticConfiguration__Uri = https://elasticsearch.eventcastify.com
+        ElasticConfiguration__Uri :  'https://elasticsearch.eventcastify.com'
         #Aws configuration
-        - AWSConfig__Storage__AccessKey = bhoI3QN/BQeWc+jiBZZY/RGi5L2dATpJWGWbLJl45a8=
-        - AWSConfig__Storage__SecretKey = ulQ8hb5d/eI0NfKfMkSjIwogpwUsGEWRiUEU7PIR7v4y0prRZAQdAR8FXDG3k2nt
-        - AWSConfig__Storage__Bucket = medical-3391201
-        - AWSConfig__Storage__Folder = auth-ms-prod
-        - AWSConfig__Storage__RegionPoint = ap-southeast-1
+        AWSConfig__Storage__AccessKey :  'bhoI3QN/BQeWc+jiBZZY/RGi5L2dATpJWGWbLJl45a8=' 
+        AWSConfig__Storage__SecretKey :  'ulQ8hb5d/eI0NfKfMkSjIwogpwUsGEWRiUEU7PIR7v4y0prRZAQdAR8FXDG3k2nt'
+        AWSConfig__Storage__Bucket :  'medical-3391201'
+        AWSConfig__Storage__Folder :  'auth-ms-prod'
+        AWSConfig__Storage__RegionPoint :  'ap-southeast-1'
         #cors configuration
-        - CorsSiteConfiguration__EventApp = https://eventcastify.com
+        CorsSiteConfiguration__EventApp :  'https://eventcastify.com'
         #email configuration
-        - EmailConfiguration__EmailFrom = eventcastify@gmail.com
-        - EmailConfiguration__Server = smtp-relay.sendinblue.com
-        - EmailConfiguration__Port = 587
-        - EmailConfiguration__Username = eventcastify@gmail.com
-        - EmailConfiguration__Password = YwdTLAzZ4cHr2BjG
+        EmailConfiguration__EmailFrom :  'eventcastify@gmail.com'
+        EmailConfiguration__Server :  'smtp-relay.sendinblue.com'
+        EmailConfiguration__Port :  587"
+        EmailConfiguration__Username :  'eventcastify@gmail.com'
+        EmailConfiguration__Password :  'YwdTLAzZ4cHr2BjG'
+        ASPNETCORE_ENVIRONMENT: Production
+        ASPNETCORE_URLS: 'http://+:80'
 
     volumes:
         - ~/.aspnet/https:/https:ro
