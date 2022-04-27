@@ -4,17 +4,55 @@ networks:
     authdev:
       name: authdev
       driver: bridge
+volumes:
+  elasticsearch-data:
+    driver: local
 
 services:
-  eventauthserver:
-    image: saugatdahal20/auth_server:latest
-   
-    build:
+   elasticsearch:
+       container_name: elasticsearch
+       image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+       ports:
+        - 9200:9200
+       volumes:
+        - elasticsearch-data:/usr/share/elasticsearch/data
+       environment:
+        - xpack.monitoring.enabled=true
+        - xpack.watcher.enabled=false
+        - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        - discovery.type=single-node
+       ulimits:
+          memlock:
+            soft: -1
+            hard: -1
+          nofile:
+            soft: 65536
+            hard: 65536
+       cap_add:
+          - IPC_LOCK
+       networks:
+        - authdev
+      
+   kibana:
+       container_name: kibana
+       image: docker.elastic.co/kibana/kibana:7.6.2
+       ports:
+        - 5601:5601
+       depends_on:
+        - elasticsearch
+       environment:
+        - ELASTICSEARCH_URL=http://localhost:9200
+       networks:
+        - authdev
+
+   eventauthserver:
+     image: saugatdahal20/auth_server:latest
+     build:
       context: .
       dockerfile: EventAuthServer/Dockerfile
-    ports:
+     ports:
         - '45320:44321'
-    environment:
+     environment:
         ConnectionStrings__SQLConnection: 'Server=165.227.217.50,1433;Database=authorization_control;User=sa;Password=1Saugat#9004#A;MultipleActiveResultSets= true'
          # identity config for facebook and google login
         IdentityConfig__SocialMedia__Google__ClientId :  '200334325363-bc8oh611hrl2qiii4m4tnfn0cdad3ef6.apps.googleusercontent.com'
@@ -48,14 +86,14 @@ services:
         #email configuration
         EmailConfiguration__EmailFrom :  'eventcastify@gmail.com'
         EmailConfiguration__Server :  'smtp-relay.sendinblue.com'
-        EmailConfiguration__Port :  587"
+        EmailConfiguration__Port :  587
         EmailConfiguration__Username :  'eventcastify@gmail.com'
         EmailConfiguration__Password :  'YwdTLAzZ4cHr2BjG'
         ASPNETCORE_ENVIRONMENT: Production
         ASPNETCORE_URLS: 'http://+:80'
 
-    volumes:
+     volumes:
         - ~/.aspnet/https:/https:ro
-    networks:
+     networks:
         - authdev
-    restart: on-failure
+     restart: on-failure
