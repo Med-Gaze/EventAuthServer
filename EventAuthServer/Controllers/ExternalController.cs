@@ -93,15 +93,15 @@ namespace EventAuthServer.Controllers
             var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider,
                 info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
 
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
             if (!signInResult.Succeeded)
             {
                 // Get the email claim value
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
 
                 if (email != null)
                 {
                     // Create a new user without password if we do not have a user already
-                    var user = await _userManager.FindByEmailAsync(email);
 
                     if (user == null)
                     {
@@ -121,19 +121,25 @@ namespace EventAuthServer.Controllers
 
                     // Add a login (i.e insert a row for the user in AspNetUserLogins table)
                     await _userManager.AddLoginAsync(user, info);
-                    await _signInManager.SignInAsync(user, isPersistent: true);
-                    if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Name))
-                    {
-                        await _userManager.AddClaimAsync(user, new Claim("Fullname", info.Principal.FindFirst(ClaimTypes.Name).Value));
-                    }
-                    return LocalRedirect(returnUrl);
+
                 }
-                throw new Exception("External authentication error");
+                else
+                {
+                    throw new Exception("External authentication error");
+                }
             }
-            else
-            {
-                return LocalRedirect(returnUrl);
-            }
+            var role = await _userManager.GetRolesAsync(user);
+            var claims = new List<Claim>
+                            {
+                            new Claim("FullName", string.IsNullOrEmpty(user.FullName)? user.Email: user.FullName),
+                            new Claim("Email", user.Email),
+                            new Claim("PhoneNumber", user.PhoneNumber ?? string.Empty),
+                            new Claim("Role", role.FirstOrDefault()),
+                            };
+
+            await _signInManager.SignInWithClaimsAsync(user, isPersistent: true, claims);
+
+            return LocalRedirect(returnUrl);
         }
 
     }

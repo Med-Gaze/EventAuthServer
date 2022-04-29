@@ -158,6 +158,7 @@ namespace EventAuthServer
             });
 
             services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
+
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
@@ -226,11 +227,16 @@ namespace EventAuthServer
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            var forwardOptions = new ForwardedHeadersOptions
             {
-                RequireHeaderSymmetry = false,
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            });
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+                RequireHeaderSymmetry = false
+            };
+
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+
+            app.UseForwardedHeaders(forwardOptions);
 
             app.UseStaticFiles();
 

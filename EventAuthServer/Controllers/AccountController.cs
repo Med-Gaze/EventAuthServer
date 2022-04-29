@@ -208,8 +208,11 @@ namespace EventAuthServer.Controllers
                             {
                             new Claim(ClaimTypes.Name, user.UserName),
                             new Claim(JwtClaimTypes.Subject, user.Id),
-                            new Claim("FullName", user.FullName),
+                            new Claim("FullName", string.IsNullOrEmpty(user.FullName)? user.Email: user.FullName),
+                            new Claim("Email", user.Email),
                             new Claim(ClaimTypes.Role, role.FirstOrDefault()),
+                            new Claim("PhoneNumber", user.PhoneNumber ?? string.Empty),
+                            new Claim("Role", role.FirstOrDefault()),
                             };
 
                             var claimsIdentity = new ClaimsIdentity(
