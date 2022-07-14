@@ -150,4 +150,35 @@ namespace EventAuthServer.Domains.ViewModels.Identity
         public string ExternalLoginScheme => IsExternalLoginOnly ? ExternalProviders?.SingleOrDefault()?.AuthenticationScheme : null;
 
     }
+    public class RegisterEmployeeViewModel
+    {
+        [Required]
+        [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
+        [Display(Name = "Name")]
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+
+        [Required]
+        public string LastName { get; set; }
+
+        public string CalledName { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+
+        [Required]
+        public string PhoneNumber { get; set; }
+
+    }
+    public class UpdateEmployeeRequest
+    {
+        public string Id { get; set; }
+        public string RoleId { get; set; }
+        public string FullName { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
+    }
 }
