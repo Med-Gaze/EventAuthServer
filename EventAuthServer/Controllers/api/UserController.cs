@@ -229,7 +229,7 @@ namespace EventAuthServer.Controllers.api
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, userResult.Errors);
             }
-            var roleResult = await _userManager.AddToRoleAsync(applicationUser, "Staff");
+            var roleResult = await _userManager.AddToRoleAsync(applicationUser, IdentityRoleConstant.Staff);
             if (!roleResult.Succeeded)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, roleResult.Errors);

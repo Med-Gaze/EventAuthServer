@@ -1,114 +1,351 @@
+using EventAuthServer;
+using EventAuthServer.Datum.Static;
 using EventAuthServer.Entity;
+using EventAuthServer.Helper;
 using EventAuthServer.ModelBuilderExtension;
+using IdentityServer4;
+using IdentityServer4.Services;
+using med.common.api.library.fileupload;
+using med.common.library.configuration;
+using med.common.library.configuration.service;
+using med.common.library.security;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Compact;
 using Serilog.Sinks.Elasticsearch;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Security.Claims;
+using static med.common.library.constant.Policy;
 
-namespace EventAuthServer
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+var config = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile(
+        $"appsettings.{environment}.json",
+        optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables()
+    .Build();
+
+// Create the Serilog logger, and configure the sinks
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .Enrich.FromLogContext()
+    .Enrich.WithExceptionDetails()
+    .Enrich.WithProcessId()
+    .Enrich.WithThreadId()
+    .Enrich.WithMachineName()
+    .WriteTo.Console()
+    .WriteTo.Elasticsearch(ConfigureElasticSink(config, environment))
+    .CreateBootstrapLogger();
+
+
+Log.Information("Starting host");
+try
 {
-    public class Program
+    var builder = WebApplication.CreateBuilder(args);
+    // Add services to the container.
+    builder.WebHost.UseContentRoot(Directory.GetCurrentDirectory())
+        .UseUrls("https://*:44321").CaptureStartupErrors(true)
+        .ConfigureAppConfiguration((hostingContext, config) =>
     {
-        public static void Main(string[] args)
+        var env = hostingContext.HostingEnvironment;
+        config.SetBasePath(env.ContentRootPath)
+          .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+          .AddJsonFile(path: $"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+        config.AddEnvironmentVariables();
+    }).UseIISIntegration().UseDefaultServiceProvider(options =>
+                    options.ValidateScopes = false);
+    builder.Host.UseSerilog(Log.Logger);
+
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddControllersWithViews(options =>
+    {
+        options.RequireHttpsPermanent = true; // does not affect api requests
+        options.RespectBrowserAcceptHeader = true;
+
+    }).ConfigureApiBehaviorOptions(options =>
+    {
+        options.SuppressConsumesConstraintForFormFileParameters = true;
+        options.SuppressInferBindingSourcesForParameters = true;
+        options.SuppressModelStateInvalidFilter = true;
+        options.SuppressMapClientErrors = true;
+        options.ClientErrorMapping[404].Link =
+            "https://httpstatuses.com/404";
+
+    }).AddNewtonsoftJson(x =>
+                    x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+    builder.Services.AddDbContext<AppDbContext>().AddHealthChecks();
+    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+    builder.Services.AddIdentity<AppUserModel, IdentityRole<string>>(options =>
+    {
+        // Password settings.
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequiredUniqueChars = 2;
+
+        // Lockout settings.
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(1);
+        options.Lockout.MaxFailedAccessAttempts = config.GetSection("IdentityConfig:MaxFailedAccess").Get<int>();
+        options.Lockout.AllowedForNewUsers = true;
+
+        // User settings.
+        options.User.AllowedUserNameCharacters =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        options.User.RequireUniqueEmail = true;
+        options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
+        options.SignIn.RequireConfirmedEmail = true;
+        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedPhoneNumber = false;
+        options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
+    })
+        .AddRoles<IdentityRole<string>>()
+        .AddEntityFrameworkStores<AppDbContext>()
+        .AddDefaultTokenProviders();
+
+    builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+    options.TokenLifespan = TimeSpan.FromDays(1));
+
+
+    builder.Services.Configure<PasswordHasherOptions>(option =>
+    {
+        option.IterationCount = 11250;
+    });
+
+    var identityBuilder = builder.Services.AddIdentityServer(options =>
+    {
+        options.Events.RaiseErrorEvents = true;
+        options.Events.RaiseInformationEvents = true;
+        options.Events.RaiseFailureEvents = true;
+        options.Events.RaiseSuccessEvents = true;
+        options.EmitStaticAudienceClaim = true;
+    })
+    .AddAspNetIdentity<AppUserModel>()
+    .AddInMemoryIdentityResources(ApiResourceClient.GetIdentityResources())
+    .AddInMemoryApiScopes(ApiResourceClient.GetApiScopes())
+    .AddInMemoryApiResources(ApiResourceClient.GetApiResources())
+    .AddInMemoryClients(ApiResourceClient.GetClients())
+    .AddProfileService<IdentityProfileService>();
+
+    identityBuilder.AddDeveloperSigningCredential();
+
+
+    builder.Services.AddAuthentication(IdentityServerConstants.DefaultCookieAuthenticationScheme).AddGoogle(options =>
+    {
+        IConfigurationSection googleAuthNSection =
+        config.GetSection("IdentityConfig:SocialMedia:Google");
+        options.ClientId = googleAuthNSection["ClientId"];
+        options.ClientSecret = googleAuthNSection["ClientSecret"];
+        options.SaveTokens = true;
+    }).AddFacebook(options =>
+    {
+        IConfigurationSection FBAuthNSection =
+        config.GetSection("IdentityConfig:SocialMedia:Facebook");
+        options.ClientId = FBAuthNSection["ClientId"];
+        options.ClientSecret = FBAuthNSection["ClientSecret"];
+        options.SaveTokens = true;
+    }).AddCookie().AddLocalApi();
+
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+    });
+
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy(IdentityServerConstants.LocalApi.PolicyName, policy =>
         {
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            policy.AddAuthenticationSchemes(IdentityServerConstants.DefaultCookieAuthenticationScheme);
+            policy.RequireAuthenticatedUser();
+            // custom requirements
+        });
+    });
 
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile(
-                    $"appsettings.{environment}.json",
-                    optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
+    builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
-            // Create the Serilog logger, and configure the sinks
-            Log.Logger = new LoggerConfiguration().Enrich.FromLogContext().Enrich.WithExceptionDetails().WriteTo.Console(new RenderedCompactJsonFormatter())
-            .WriteTo.Elasticsearch(ConfigureElasticSink(config, environment))
-            .Enrich.WithProperty("Environment", environment)
-            .ReadFrom.Configuration(config)
-            .CreateLogger();
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders =
+            ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    });
 
-            Log.Information("Starting host");
-            // Wrap creating and running the host in a try-catch block
-            var host = CreateHostBuilder(args).Build();
+    builder.Services.Configure<IISServerOptions>(options =>
+    {
+        options.AutomaticAuthentication = false;
+    });
 
-            using (var scope = host.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
+    builder.Services.Configure<IISOptions>(options =>
+    {
+        options.ForwardClientCertificate = false;
+    });
 
-                try
-                {
-                    var context = services.GetRequiredService<AppDbContext>();
-                    var configDb = config.GetSection("DbConfig");
-                    var migration = configDb.GetValue<bool>("Migrate");
 
-                    if (context.Database.IsSqlServer() && migration)
-                    {
-                        context.Database.Migrate();
-                    }
-                    var seed = configDb.GetValue<bool>("Seed");
+    builder.Services.AddSwaggerGen();
 
-                    if (seed)
-                    {
-                        var userManager = services.GetRequiredService<UserManager<AppUserModel>>();
-                        var roleManager = services.GetRequiredService<RoleManager<IdentityRole<string>>>();
+    builder.Services.RegisterApiVersion();
 
-                        ModelBuilderExtensionsHelper.SeedData(context, userManager, roleManager, config).Wait();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var corsConfiguration = config.GetSection("CorsSiteConfiguration").GetChildren().Select(x => x.Value).ToArray();
 
-                    logger.LogError(ex, "An error occurred while migrating or seeding the database.");
-                    Log.Fatal(ex, "Host terminated unexpectedly");
-                    throw;
-                }
-                finally
-                {
-                    Log.CloseAndFlush();
-                }
-            }
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(CorsPolicyParam.CorsPolicyName,
+        builder =>
+        {
+            builder.WithOrigins(corsConfiguration).AllowAnyHeader().SetIsOriginAllowedToAllowWildcardSubdomains().AllowAnyMethod();
+        });
+    });
 
-            host.Run();
+    builder.Services.AddHttpClient();
+
+    builder.Services.AddHttpContextAccessor();
+
+    builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+    builder.Services.Configure<IdentityConfig>(options => config.GetSection("IdentityConfig").Bind(options));
+    builder.Services.Configure<ModuleSettings>(options => config.GetSection("ModuleConfig").Bind(options));
+    builder.Services.Configure<CryptoSettings>(options => config.GetSection("CryptoConfig").Bind(options));
+    var hasAWSStorage = config.GetSection("AWSConfig:Storage").Exists();
+    if (hasAWSStorage)
+        builder.Services.AddSingleton<IAWSFileUploader, AWSFileUploader>();
+    builder.Services.AddTransient<IProfileService, IdentityProfileService>();
+    builder.Services.AddSingleton<IConfigureOptions<SwaggerGenOptions>, Swagger>();
+    builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+    builder.Services.AddTransient<ICryptography, Cryptography>();
+    builder.Services.AddSingleton<ICurrentUserService, CurrentUserService>();
+    builder.Services.AddSingleton<IEmailService, EmailService>();
+    builder.Services.AddHttpClient<IConfigurationService, ConfigurationService>()
+       .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+    var app = builder.Build();
+    var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<AppDbContext>();
+        var configDb = config.GetSection("DbConfig");
+        var migration = configDb.GetValue<bool>("Migrate");
+        var seed = configDb.GetValue<bool>("Seed");
+        if (context.Database.IsSqlServer() && migration)
+        {
+            context.Database.Migrate();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-          Host.CreateDefaultBuilder(args)
-              .UseSerilog()
-              .ConfigureWebHostDefaults(webBuilder =>
-              {
-                  webBuilder.UseStartup<Startup>();
-                  webBuilder.UseContentRoot(Directory.GetCurrentDirectory());
-                  webBuilder.UseUrls("https://*:44321");
-                  webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
-                  {
-                      var env = hostingContext.HostingEnvironment;
-                      config.SetBasePath(env.ContentRootPath)
-                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                        .AddJsonFile(path: $"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
-                      config.AddEnvironmentVariables();
-                  });
-                  webBuilder.CaptureStartupErrors(true);
-                  webBuilder.UseIISIntegration();
-              });
-        private static ElasticsearchSinkOptions ConfigureElasticSink(IConfigurationRoot configuration, string environment)
+        if (app.Environment.IsDevelopment())
         {
-            return new ElasticsearchSinkOptions(new Uri(configuration["ElasticConfiguration:Uri"]))
-            {
-                AutoRegisterTemplate = true,
-                IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name.ToLower().Replace(".", "-")}-{environment?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
-            };
+            app.UseDeveloperExceptionPage();
+            app.UseMigrationsEndPoint();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Error");
+            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            app.UseHsts();
+        }
+        if (seed)
+        {
+            var userManager = services.GetRequiredService<UserManager<AppUserModel>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole<string>>>();
+
+            ModelBuilderExtensionsHelper.SeedData(context, userManager, roleManager, config).Wait();
         }
     }
+    var forwardOptions = new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+        RequireHeaderSymmetry = false
+    };
+
+    forwardOptions.KnownNetworks.Clear();
+    forwardOptions.KnownProxies.Clear();
+
+    app.UseForwardedHeaders(forwardOptions);
+
+    app.UseStaticFiles();
+    #region swagger configuration 
+
+
+    app.UseSwagger();
+
+    app.UseSwaggerUI(options =>
+    {
+        //Build a swagger endpoint for each discovered API version  
+        foreach (var description in provider.ApiVersionDescriptions.OrderByDescending(x => x.ApiVersion).ToList())
+        {
+
+            var swaggerEndPoint = $"/swagger/{description.GroupName}/swagger.json";
+            if (app.Environment.IsStaging() || app.Environment.IsProduction())
+            {
+                swaggerEndPoint = $"/swagger/{description.GroupName}/swagger.json";
+            }
+            options.SwaggerEndpoint(swaggerEndPoint, $"Api {description.GroupName}");
+            options.RoutePrefix = "swagger";
+            options.InjectStylesheet("/swagger/ui/custom.css");
+            options.InjectJavascript("/swagger/ui/custom.js");
+            options.DocumentTitle = "API endpoint Collection";
+            options.OAuthUsePkce();
+        }
+    });
+
+    #endregion
+
+    app.UseRouting();
+
+    app.UseCors(CorsPolicyParam.CorsPolicyName);
+
+    app.UseIdentityServer();
+
+    app.UseCookiePolicy();
+
+    app.UseAuthorization();
+
+    app.UseSerilogRequestLogging();
+
+    app.UseApiVersioning();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapDefaultControllerRoute();
+
+    });
+    app.Run();
+
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
+static ElasticsearchSinkOptions ConfigureElasticSink(IConfigurationRoot configuration, string environment)
+{
+    return new ElasticsearchSinkOptions(new Uri(configuration["ElasticConfiguration:Uri"]))
+    {
+        AutoRegisterTemplate = true,
+        IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name.ToLower().Replace(".", "-")}-{environment?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
+    };
 }
