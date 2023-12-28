@@ -28,12 +28,15 @@ namespace EventAuthServer.Helper
         public async Task GetProfileDataAsync(ProfileDataRequestContext context)
         {
             var userClaims = new List<Claim>();
-
             var userId = context.Subject.GetSubjectId();
             var user = await _userManager.FindByIdAsync(userId);
+            var today = DateTime.Today;
+
+            // Calculate the age.
+            var age = today.Year - user.DOB.Year; ;
             var role = await _userManager.GetRolesAsync(user);
             var fileId = user.FileId.HasValue ? user.FileId.ToString() : string.Empty;
-           
+
             userClaims.AddRange(new List<Claim>
             {
                 new Claim(ClaimTypes.Role, role.FirstOrDefault()),
@@ -42,6 +45,7 @@ namespace EventAuthServer.Helper
                 new Claim("NickName", user.NickName??string.Empty),
                 new Claim("ProfileFileId", fileId),
                 new Claim("Email", user.Email),
+                new Claim("Age", age.ToString()),
                 new Claim("PhoneNumber", user.PhoneNumber??string.Empty),
             });
 
@@ -54,6 +58,6 @@ namespace EventAuthServer.Helper
             var user = await _userManager.FindByIdAsync(sub);
             context.IsActive = user != null;
         }
-       
+
     }
 }

@@ -373,6 +373,7 @@ namespace EventAuthServer.Controllers
                 FullName = string.Join(" ", model.FirstName, model.MiddleName, model.LastName),
                 NickName = model.CalledName,
                 Email = model.Email,
+                DOB = model.DOB,
                 LockoutEnabled = true,
                 NormalizedEmail = model.Email.ToUpper(),
                 NormalizedUserName = model.Email.ToUpper(),

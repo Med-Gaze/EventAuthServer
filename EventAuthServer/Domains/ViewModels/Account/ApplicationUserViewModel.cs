@@ -142,6 +142,8 @@ namespace EventAuthServer.Domains.ViewModels.Identity
 
         [Required]
         public string PhoneNumber { get; set; }
+        [Required]
+        public DateTime DOB { get; set; }
         public string ReturnUrl { get; set; }
         public bool EnableLocalLogin { get; set; } = true;
         public IEnumerable<ExternalProvider> ExternalProviders { get; set; } = Enumerable.Empty<ExternalProvider>();
@@ -162,12 +164,15 @@ namespace EventAuthServer.Domains.ViewModels.Identity
         public string LastName { get; set; }
 
         public string CalledName { get; set; }
+        [Required]
+        public string Role { get; set; }
 
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
-
+        [Required]
+        public DateTime DOB { get; set; }
 
         [Required]
         public string PhoneNumber { get; set; }

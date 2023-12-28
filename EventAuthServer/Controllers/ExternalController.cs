@@ -111,6 +111,8 @@ namespace EventAuthServer.Controllers
                             FullName = info.Principal.FindFirstValue(ClaimTypes.Name),
                             Email = info.Principal.FindFirstValue(ClaimTypes.Email),
                             EmailConfirmed = true,
+                            DOB = DateTime.Parse(info.Principal.FindFirstValue(ClaimTypes.DateOfBirth)),
+                            PhoneNumber = info.Principal.FindFirstValue(ClaimTypes.MobilePhone),
                             Status = (int)AccountStatusEnum.Pending
 
                         };
@@ -129,11 +131,16 @@ namespace EventAuthServer.Controllers
                 }
             }
             var role = await _userManager.GetRolesAsync(user);
+            var today = DateTime.Today;
+
+            // Calculate the age.
+            var age = today.Year - user.DOB.Year;
             var claims = new List<Claim>
                             {
                             new Claim("FullName", string.IsNullOrEmpty(user.FullName)? user.Email: user.FullName),
                             new Claim("Email", user.Email),
                             new Claim("PhoneNumber", user.PhoneNumber ?? string.Empty),
+                            new Claim("Age", age.ToString()),
                             new Claim("Role", role.FirstOrDefault()),
                             };
 

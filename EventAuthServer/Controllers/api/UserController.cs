@@ -196,7 +196,7 @@ namespace EventAuthServer.Controllers.api
 
         [HttpPost]
         [Route("CreateEmployee")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> CreateEmployee([FromBody] RegisterEmployeeViewModel model)
         {
             bool usernameExists = await _userManager.FindByNameAsync(model.Email) != null;
@@ -217,6 +217,7 @@ namespace EventAuthServer.Controllers.api
                 FullName = string.Join(" ", model.FirstName, model.MiddleName, model.LastName),
                 NickName = model.CalledName,
                 Email = model.Email,
+                DOB = model.DOB,
                 LockoutEnabled = true,
                 NormalizedEmail = model.Email.ToUpper(),
                 NormalizedUserName = model.Email.ToUpper(),
@@ -229,7 +230,7 @@ namespace EventAuthServer.Controllers.api
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, userResult.Errors);
             }
-            var roleResult = await _userManager.AddToRoleAsync(applicationUser, IdentityRoleConstant.Staff);
+            var roleResult = await _userManager.AddToRoleAsync(applicationUser, model.Role);
             if (!roleResult.Succeeded)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, roleResult.Errors);
@@ -251,7 +252,7 @@ namespace EventAuthServer.Controllers.api
             {
                 return BadRequest(ex.Message);
             }
-            return Ok();
+            return Ok(applicationUser.Id);
         }
 
 
