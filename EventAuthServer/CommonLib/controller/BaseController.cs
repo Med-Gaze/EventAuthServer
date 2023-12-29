@@ -9,7 +9,7 @@ namespace med.common.library.controller
     ///  custom controller without url versioning
     /// </summary>
     [ApiController]
-    [Route("api/v{api-version:apiVersion}/[Controller]")]
+    [Route("api/v1/[Controller]")]
     public abstract class BaseController : ControllerBase
     {
         private ISender _mediator = null!;
