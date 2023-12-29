@@ -4,6 +4,261 @@
         <name>EventAuthServer</name>
     </assembly>
     <members>
+        <member name="T:med.common.library.constant.IdentityRoleConstant">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:med.common.library.constant.IdentityRoleConstant.SuperAdmin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:med.common.library.constant.IdentityRoleConstant.Admin">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:med.common.library.constant.IdentityRoleConstant.Default">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:med.common.library.constant.IdentityRoleConstant.Staff">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:med.common.library.constant.IdentityRoleConstant.RoleList">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:med.common.library.controller.BaseController">
+            <summary>
+             custom controller without url versioning
+            </summary>
+        </member>
+        <member name="P:med.common.library.controller.BaseController.Mediator">
+            <summary>
+            event driven design for api 
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.IPagedList`1.PageIndex">
+            <summary>
+            Page index
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.IPagedList`1.PageSize">
+            <summary>
+            Page size
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.IPagedList`1.TotalCount">
+            <summary>
+            Total count
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.IPagedList`1.TotalPages">
+            <summary>
+            Total pages
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.IPagedList`1.HasPreviousPage">
+            <summary>
+            Has previous page
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.IPagedList`1.HasNextPage">
+            <summary>
+            Has next age
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.IPagedList`1.Items">
+            <summary>
+            Items
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PagedList`1.PageIndex">
+            <summary>
+            Page index
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PagedList`1.PageSize">
+            <summary>
+            Page size
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PagedList`1.TotalCount">
+            <summary>
+            Total count
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PagedList`1.TotalPages">
+            <summary>
+            Total pages
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PagedList`1.HasPreviousPage">
+            <summary>
+            Has previous page
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PagedList`1.HasNextPage">
+            <summary>
+            Has next page
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PagedList`1.Items">
+            <summary>
+            Items
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PageSearchArgs.PageIndex">
+            <summary>
+            Page index
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PageSearchArgs.PageSize">
+            <summary>
+            Page size
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PageSearchArgs.PagingStrategy">
+            <summary>
+            Paging strategy
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PageSearchArgs.SortingOptions">
+            <summary>
+            Sorting options
+            </summary>
+        </member>
+        <member name="P:med.common.library.database.paging.PageSearchArgs.FilteringOptions">
+            <summary>
+            Filtering options
+            </summary>
+        </member>
+        <member name="T:med.common.library.model.CreateRoleViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.CreateRoleViewModel.Title">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.CreateRoleViewModel.Alias">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.CreateRoleViewModel.Rank">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.CreateRoleViewModel.CategoryId">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.CreateRoleViewModel.IsActive">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.CreateRoleViewModel.DocumentList">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:med.common.library.model.EditRoleViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.EditRoleViewModel.Title">
+            <summary>
+            
+            </summary> public string Id { get; set; }
+        </member>
+        <member name="P:med.common.library.model.EditRoleViewModel.Rank">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.EditRoleViewModel.CategoryId">
+            <summary>
+            
+            </summary>public string Alias { get; set; }
+        </member>
+        <member name="P:med.common.library.model.EditRoleViewModel.IsActive">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:med.common.library.model.RoleViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.RoleViewModel.Id">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.RoleViewModel.Rank">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:med.common.library.model.RoleActivateViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.RoleActivateViewModel.Id">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.RoleActivateViewModel.IsActive">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:med.common.library.model.RoleDocumentViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.RoleDocumentViewModel.Id">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.RoleDocumentViewModel.RoleId">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.RoleDocumentViewModel.Title">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:med.common.library.model.CreateRoleDocumentViewModel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:med.common.library.model.CreateRoleDocumentViewModel.Title">
+            <summary>
+            
+            </summary>
+        </member>
         <member name="T:EventAuthServer.Controllers.AccountController">
             <summary>
             This sample controller implements a typical login/logout/provision workflow for local and external accounts.

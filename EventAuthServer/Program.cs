@@ -64,7 +64,7 @@ try
     var builder = WebApplication.CreateBuilder(args);
     // Add services to the container.
     builder.WebHost.UseContentRoot(Directory.GetCurrentDirectory())
-        .UseUrls("https://*:44321").CaptureStartupErrors(true)
+        .UseUrls("http://*:44321").CaptureStartupErrors(true)
         .ConfigureAppConfiguration((hostingContext, config) =>
     {
         var env = hostingContext.HostingEnvironment;
@@ -205,7 +205,6 @@ try
 
     builder.Services.AddSwaggerGen();
 
-    builder.Services.RegisterApiVersion();
 
     var corsConfiguration = config.GetSection("CorsSiteConfiguration").GetChildren().Select(x => x.Value).ToArray();
 
@@ -240,7 +239,6 @@ try
        .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
     var app = builder.Build();
-    var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
     using (var scope = app.Services.CreateScope())
     {
         var services = scope.ServiceProvider;
@@ -291,22 +289,18 @@ try
 
     app.UseSwaggerUI(options =>
     {
-        //Build a swagger endpoint for each discovered API version  
-        foreach (var description in provider.ApiVersionDescriptions.OrderByDescending(x => x.ApiVersion).ToList())
+        var swaggerEndPointv1 = $"/swagger/v1/swagger.json";
+        if (app.Environment.IsStaging() || app.Environment.IsProduction())
         {
-
-            var swaggerEndPoint = $"/swagger/{description.GroupName}/swagger.json";
-            if (app.Environment.IsStaging() || app.Environment.IsProduction())
-            {
-                swaggerEndPoint = $"/swagger/{description.GroupName}/swagger.json";
-            }
-            options.SwaggerEndpoint(swaggerEndPoint, $"Api {description.GroupName}");
-            options.RoutePrefix = "swagger";
-            options.InjectStylesheet("/swagger/ui/custom.css");
-            options.InjectJavascript("/swagger/ui/custom.js");
-            options.DocumentTitle = "API endpoint Collection";
-            options.OAuthUsePkce();
+            swaggerEndPointv1 = $"/swagger/v1/swagger.json";
         }
+        options.SwaggerEndpoint(swaggerEndPointv1, $"Api v1");
+        options.RoutePrefix = "swagger";
+        options.InjectStylesheet("/swagger/ui/custom.css");
+        options.InjectJavascript("/swagger/ui/custom.js");
+        options.DocumentTitle = "API endpoint Collection";
+        options.OAuthUsePkce();
+
     });
 
     #endregion
@@ -322,8 +316,6 @@ try
     app.UseAuthorization();
 
     app.UseSerilogRequestLogging();
-
-    app.UseApiVersioning();
 
     app.UseEndpoints(endpoints =>
     {
