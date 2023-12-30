@@ -64,7 +64,7 @@ try
     var builder = WebApplication.CreateBuilder(args);
     // Add services to the container.
     builder.WebHost.UseContentRoot(Directory.GetCurrentDirectory())
-        .UseUrls("http://*:44321").CaptureStartupErrors(true)
+        .UseUrls("https://*:44321").CaptureStartupErrors(true)
         .ConfigureAppConfiguration((hostingContext, config) =>
     {
         var env = hostingContext.HostingEnvironment;
