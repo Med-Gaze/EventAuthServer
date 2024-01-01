@@ -17,7 +17,7 @@
 		<DocumentationFile>D:\Health Project\Med-Raze\AuthServer\EventAuthServer\EventAuthServer.xml</DocumentationFile>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Compile Remove="Startup.cs" />
+		<Compile Remove="Startup.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\.editorconfig" Link=".editorconfig" />
@@ -80,14 +80,14 @@
 
 
 	<ItemGroup>
-	  <PackageReference Include="IdentityServer4" Version="4.1.2" />
-	  <PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
-	  <PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.2" />
-	  <PackageReference Include="IdentityServer4.Storage" Version="4.1.2" />
-	  <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.7" />
-	  <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.7" />
-	  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.7" />
-	  <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.7" />
+		<PackageReference Include="IdentityServer4" Version="4.1.2" />
+		<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
+		<PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.2" />
+		<PackageReference Include="IdentityServer4.Storage" Version="4.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.7" />
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
 		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.300" />
 		<PackageReference Include="AWSSDK.S3" Version="3.7.305.3" />
@@ -99,7 +99,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.7" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.7" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.7" />
-
 		<PackageReference Include="MimeKit" Version="4.3.0" />
 		<PackageReference Include="MailKit" Version="4.3.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
