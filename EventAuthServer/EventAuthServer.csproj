@@ -1,114 +1,107 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<UserSecretsId>b22d16b5-5729-4fcb-b47a-5392f77c94d4</UserSecretsId>
-		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<DockerfileContext>.</DockerfileContext>
-		<DockerComposeProjectPath>docker-compose.dcproj</DockerComposeProjectPath>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DocumentationFile>D:\Health Project\Med-Raze\AuthServer\EventAuthServer\EventAuthServer.xml</DocumentationFile>
-		<NoWarn>1701;1702;1591</NoWarn>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<NoWarn>1701;1702;1591</NoWarn>
-		<DocumentationFile>D:\Health Project\Med-Raze\AuthServer\EventAuthServer\EventAuthServer.xml</DocumentationFile>
-	</PropertyGroup>
-	<ItemGroup>
-		<Compile Remove="Startup.cs" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="..\.editorconfig" Link=".editorconfig" />
-		<None Include="wwwroot\js\site.js" />
-		<None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
-		<None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map" />
-		<None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map" />
-		<None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map" />
-		<None Include="wwwroot\lib\bootstrap\dist\css\bootstrap.css.map" />
-		<None Include="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map" />
-		<None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js" />
-		<None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map" />
-		<None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js" />
-		<None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map" />
-		<None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.js" />
-		<None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.js.map" />
-		<None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js" />
-		<None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map" />
-		<None Include="wwwroot\lib\bootstrap\LICENSE" />
-		<None Include="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js" />
-		<None Include="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js" />
-		<None Include="wwwroot\lib\jquery-validation\dist\additional-methods.js" />
-		<None Include="wwwroot\lib\jquery-validation\dist\additional-methods.min.js" />
-		<None Include="wwwroot\lib\jquery-validation\dist\jquery.validate.js" />
-		<None Include="wwwroot\lib\jquery-validation\dist\jquery.validate.min.js" />
-		<None Include="wwwroot\lib\jquery-validation\LICENSE.md" />
-		<None Include="wwwroot\lib\jquery\dist\jquery.js" />
-		<None Include="wwwroot\lib\jquery\dist\jquery.min.js" />
-		<None Include="wwwroot\lib\jquery\dist\jquery.min.map" />
-		<None Include="wwwroot\swagger\ui\custom.js" />
-	</ItemGroup>
-
-
-	<ItemGroup>
-		<Folder Include="CommonLib\behaviours\" />
-		<Folder Include="CommonLib\constant\" />
-		<Folder Include="CommonLib\controller\" />
-		<Folder Include="CommonLib\database\paging\" />
-		<Folder Include="CommonLib\database\repository\" />
-		<Folder Include="CommonLib\enum\" />
-		<Folder Include="CommonLib\exception\" />
-		<Folder Include="CommonLib\extension\" />
-		<Folder Include="CommonLib\fileupload\" />
-		<Folder Include="CommonLib\filter\" />
-		<Folder Include="CommonLib\middleware\" />
-		<Folder Include="CommonLib\model\entity\" />
-		<Folder Include="CommonLib\security\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\cryptocoins\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\flat-icons\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\css\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\js\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\less\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\scss\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\sprites\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\svgs\brands\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\svgs\regular\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\svgs\solid\" />
-		<Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\webfonts\" />
-	</ItemGroup>
-
-
-	<ItemGroup>
-		<PackageReference Include="IdentityServer4" Version="4.1.2" />
-		<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
-		<PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.2" />
-		<PackageReference Include="IdentityServer4.Storage" Version="4.1.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.7" />
-		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.300" />
-		<PackageReference Include="AWSSDK.S3" Version="3.7.305.3" />
-		<PackageReference Include="Dapper" Version="2.1.24" />
-		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-		<PackageReference Include="MediatR" Version="12.2.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.7" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.7" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.7" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.7" />
-		<PackageReference Include="MimeKit" Version="4.3.0" />
-		<PackageReference Include="MailKit" Version="4.3.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
-		<PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
-		<PackageReference Include="Serilog.Enrichers.Process" Version="2.0.2" />
-		<PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
-		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
-		<PackageReference Include="Serilog.Sinks.Elasticsearch" Version="9.0.3" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-	</ItemGroup>
-
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <UserSecretsId>b22d16b5-5729-4fcb-b47a-5392f77c94d4</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>.</DockerfileContext>
+    <DockerComposeProjectPath>docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>D:\Health Project\Med-Raze\AuthServer\EventAuthServer\EventAuthServer.xml</DocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;1591</NoWarn>
+    <DocumentationFile>D:\Health Project\Med-Raze\AuthServer\EventAuthServer\EventAuthServer.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Startup.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+    <None Include="wwwroot\js\site.js" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.js" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.js.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map" />
+    <None Include="wwwroot\lib\bootstrap\LICENSE" />
+    <None Include="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js" />
+    <None Include="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js" />
+    <None Include="wwwroot\lib\jquery-validation\dist\additional-methods.js" />
+    <None Include="wwwroot\lib\jquery-validation\dist\additional-methods.min.js" />
+    <None Include="wwwroot\lib\jquery-validation\dist\jquery.validate.js" />
+    <None Include="wwwroot\lib\jquery-validation\dist\jquery.validate.min.js" />
+    <None Include="wwwroot\lib\jquery-validation\LICENSE.md" />
+    <None Include="wwwroot\lib\jquery\dist\jquery.js" />
+    <None Include="wwwroot\lib\jquery\dist\jquery.min.js" />
+    <None Include="wwwroot\lib\jquery\dist\jquery.min.map" />
+    <None Include="wwwroot\swagger\ui\custom.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CommonLib\behaviours\" />
+    <Folder Include="CommonLib\constant\" />
+    <Folder Include="CommonLib\controller\" />
+    <Folder Include="CommonLib\database\paging\" />
+    <Folder Include="CommonLib\database\repository\" />
+    <Folder Include="CommonLib\enum\" />
+    <Folder Include="CommonLib\exception\" />
+    <Folder Include="CommonLib\extension\" />
+    <Folder Include="CommonLib\fileupload\" />
+    <Folder Include="CommonLib\filter\" />
+    <Folder Include="CommonLib\middleware\" />
+    <Folder Include="CommonLib\model\entity\" />
+    <Folder Include="CommonLib\security\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\cryptocoins\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\flat-icons\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\css\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\js\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\less\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\scss\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\sprites\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\svgs\brands\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\svgs\regular\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\svgs\solid\" />
+    <Folder Include="wwwroot\fonts\iconic-fonts\font-awesome\webfonts\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="IdentityServer4" Version="4.1.2" />
+    <PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
+    <PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.2" />
+    <PackageReference Include="IdentityServer4.Storage" Version="4.1.2" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.300" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.305.3" />
+    <PackageReference Include="Dapper" Version="2.1.24" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="MediatR" Version="12.2.0" />
+    <PackageReference Include="MimeKit" Version="4.3.0" />
+    <PackageReference Include="MailKit" Version="4.3.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
+    <PackageReference Include="Serilog.Enrichers.Process" Version="2.0.2" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+    <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
+    <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="7.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.14" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
 </Project>
