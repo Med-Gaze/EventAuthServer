@@ -282,6 +282,7 @@ try
     app.UseForwardedHeaders(forwardOptions);
 
     app.UseStaticFiles();
+
     #region swagger configuration 
 
 
